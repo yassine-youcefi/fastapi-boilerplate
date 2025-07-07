@@ -42,15 +42,15 @@ EXPOSE 8000
 # Command to run Uvicorn
 # For Development (APP_ENV=development):
 
-#     The command will run Uvicorn with the --reload option and use uvicorn_conf.py for logging configuration.
+#     The command will run Uvicorn with the --reload option and use src/config/uvicorn_conf.py for logging configuration.
 
 # For Production (default case):
 
-#     It will run Uvicorn without the --reload option and use prod_uvicorn_conf.py for production-specific logging configuration.
+#     It will run Uvicorn without the --reload option and use src/config/prod_uvicorn_conf.py for production-specific logging configuration.
 
 CMD ["sh", "-c", "if [ \"$APP_ENV\" = \"development\" ]; then \
-    uvicorn src.main:app --reload --log-config uvicorn_conf.py --host $host --port $port; \
-    else uvicorn src.main:app --log-config prod_uvicorn_conf.py --host $host --port $port; fi"]
+    uvicorn src.main:app --reload --log-config src/config/uvicorn_conf.py --host $host --port $port; \
+    else uvicorn src.main:app --log-config src/config/prod_uvicorn_conf.py --host $host --port $port; fi"]
 
 
 

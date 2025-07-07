@@ -15,6 +15,7 @@ A robust, production-ready FastAPI backend template following best practices for
 - **Async SQLAlchemy** support
 - **Environment variable management** with `.env`
 - **pgAdmin** integration for easy PostgreSQL management
+- **Consistent error responses** with a top-level `errors` array
 
 ---
 
@@ -27,11 +28,13 @@ fastapi-boilerplate/
 │   ├── config/             # Configuration files
 │   │   └── config.py       # Main app settings
 │   ├── database.py         # Database connection setup
-│   ├── exceptions.py       # Custom exception handlers
 │   ├── main.py             # App entrypoint
 │   ├── pagination.py       # Pagination utilities
 │   ├── shop/               # Shop domain logic
 │   └── user/               # User domain logic
+│       ├── exceptions.py   # User-specific exception handling
+│       ├── dependencies.py # User dependencies
+│       └── ...             # Models, routes, schemas, services, utils
 ├── scripts/                # Utility scripts
 ├── tests/                  # Test suite
 ├── requirements.txt        # Python dependencies
@@ -54,6 +57,7 @@ fastapi-boilerplate/
 - Enforce code quality with pre-commit hooks.
 - Use API versioning for all endpoints.
 - Use Docker Compose for local development and production parity.
+- All API errors are returned as a top-level `errors` array for consistency.
 
 ---
 
@@ -112,6 +116,22 @@ pre-commit install
   alembic revision --autogenerate -m "Describe your change"
   alembic upgrade head
   ```
+
+---
+
+## 🛡️ Error Handling
+- All API errors are returned as a top-level `errors` array:
+  ```json
+  {
+    "errors": [
+      {
+        "error_code": "DUPLICATE_USER_EMAIL",
+        "message": "User with email yani2@skyloov.com already exists"
+      }
+    ]
+  }
+  ```
+- Validation errors and custom exceptions follow this format for consistency and easy frontend integration.
 
 ---
 

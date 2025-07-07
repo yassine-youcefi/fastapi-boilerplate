@@ -1,7 +1,7 @@
 import jwt
 import time
 from starlette.concurrency import run_in_threadpool
-from app.config.config import Settings, settings
+from app.config.config import settings
 
 class TokenUtils:
     @staticmethod

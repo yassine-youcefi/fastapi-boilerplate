@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import status
-from app.exceptions import raise_http_exception
+from app.user.exceptions import raise_predefined_http_exception, DuplicateUserEmailException, InvalidCredentialsException
 from app.user.models.user_models import User
 from app.user.utils.hash_utils import HashUtils
 from app.user.utils.token_utils import TokenUtils
@@ -14,11 +14,7 @@ class UserService:
 
     async def signup(self, signup_data: AuthSignup) -> User:
         if await self.user_exists_by_email(email=signup_data.email):
-            raise raise_http_exception(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"User with email {signup_data.email} already exists",
-                error_code="DUPLICATE_USER_EMAIL"
-            )
+            raise_predefined_http_exception(DuplicateUserEmailException(signup_data.email))
         hashed_password = await HashUtils.hash_password(password=signup_data.password)
         signup_data.password = hashed_password
         new_user = User(**signup_data.dict())
@@ -30,11 +26,7 @@ class UserService:
     async def login(self, login_data: AuthLogin) -> AuthResponse:
         user = await self.get_user_by_email(email=login_data.email)
         if user is None or not await HashUtils.check_password(password=login_data.password, hashed_password=user.password):
-            raise raise_http_exception(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
-                error_code="INVALID_CREDENTIALS"
-            )
+            raise_predefined_http_exception(InvalidCredentialsException())
         token = await TokenUtils.generate_token(user_id=user.id)
         return AuthResponse(access_token=token, token_type="bearer")
 

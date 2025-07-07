@@ -1,13 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Depends, status
-
-from app.config.database import get_db
 from app.user.dependencies import get_user_service
 from app.user.schemas import AuthSignup, AuthLogin,  AuthResponse, UserResponse
 
-
 user_router = APIRouter()
-
 
 @user_router.post(
     "/login", 

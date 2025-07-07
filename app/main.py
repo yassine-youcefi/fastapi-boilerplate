@@ -1,6 +1,8 @@
-from fastapi import FastAPI, Depends
-from app.api.v1.api_router import api_router
-from app.config.config import Settings, settings
+from fastapi import FastAPI
+from fastapi.exception_handlers import RequestValidationError
+from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
+from app.user.routes.v1.user_routers import user_router
+from app.user.exceptions import custom_http_exception_handler, custom_validation_exception_handler
 
 
 def create_app() -> FastAPI:
@@ -11,8 +13,12 @@ def create_app() -> FastAPI:
         version="0.0.1",
         debug=True
     )
-    # Include central API router
-    app.include_router(api_router, prefix="/api/v1")
+    # Exception handlers
+    app.add_exception_handler(Exception, custom_http_exception_handler)
+    app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
+    app.add_exception_handler(FastAPIRequestValidationError, custom_validation_exception_handler)
+    # Include user router
+    app.include_router(user_router, prefix="/api/v1/user", tags=["User"])
 
     @app.get("/")
     async def read_root():

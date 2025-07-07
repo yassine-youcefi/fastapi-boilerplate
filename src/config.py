@@ -1,19 +1,32 @@
-import os
-from dotenv import load_dotenv # type: ignore
-from pydantic_settings import BaseSettings # type: ignore
-
-load_dotenv()
+from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Settings(BaseSettings):
+    """
+    Application configuration using Pydantic BaseSettings.
+    Loads variables from environment and .env file.
+    """
     PROJECT_NAME: str = "FastQR-Dine Backend"
-    APP_ENV: str = os.getenv("APP_ENV", "development")
-    DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
-    JWT_SECRET: str = os.getenv("JWT_SECRET")
-    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
-    JWT_EXPIRES_IN: int = os.getenv("JWT_EXPIRES_IN", 36000)
-    ECHO_SQL: bool = "true"
+    APP_ENV: str = "development"
+    DEBUG: bool = True
+    JWT_SECRET: str
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRES_IN: int = 36000
+    ECHO_SQL: bool = True
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 5
-    DATABASE_URL: str = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+    DB_USER: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: str
+    DB_NAME: str
+
+    @property
+    def DATABASE_URL(self) -> str:
+        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Settings()

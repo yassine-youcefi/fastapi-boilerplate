@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  fastapi:
+    container_name: fastapi
+    build:
+      context: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    
+    command: >
+      sh -c "if [ \"$APP_ENV\" = \"development\" ]; then \
+        uvicorn src.main:app --reload --host 0.0.0.0 --port 8000; \
+        else uvicorn src.main:app --host 0.0.0.0 --port 8000; fi"
+    volumes:
+      - .:/code
+    networks:
+      - fastapi_network
+
+networks:
+  fastapi_network:
+    driver: bridge
+    external: true

@@ -1,6 +1,7 @@
 from typing import Optional
 from pydantic import BaseModel
 from fastapi import HTTPException
+from app.config.config import Settings, settings
 
 # Error Message Schema
 class ErrorResponse(BaseModel):

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
+from app.config.config import Settings, settings
 
 
 class AuthSignup(BaseModel):

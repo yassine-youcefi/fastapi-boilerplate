@@ -4,7 +4,8 @@ from typing import Annotated, Union
 from .token_utils import TokenUtils
 from app.user.services import UserService
 from app.user.schemas import UserResponse
-from app.database import get_db
+from app.config.database import get_db
+from app.config.config import Settings, settings
 
 AUTH_PREFIX = "Bearer "
 

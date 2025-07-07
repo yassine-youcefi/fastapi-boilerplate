@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
 from app.api.v1.api_router import api_router
+from app.config.config import Settings, settings
 
 
 def create_app() -> FastAPI:

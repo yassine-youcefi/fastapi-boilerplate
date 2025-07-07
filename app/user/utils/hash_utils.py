@@ -1,5 +1,5 @@
-
 from bcrypt import checkpw, hashpw, gensalt
+from app.config.config import Settings, settings
 
 
 class HashUtils:

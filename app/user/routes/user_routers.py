@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, status
 
-from app.database import get_db
+from app.config.database import get_db
 from app.user.services import UserService
 from app.user.schemas import AuthSignup, AuthLogin,  AuthResponse, UserResponse
+from app.config.config import Settings, settings
 
 
 userRouter = APIRouter()

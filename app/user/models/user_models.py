@@ -1,7 +1,8 @@
-from app.database import Base
+from app.config.database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from app.config.config import Settings, settings
 
 
 class User(Base):

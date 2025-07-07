@@ -5,6 +5,7 @@ from app.user.models.user_models import User
 from app.user.utils.hash_utils import HashUtils
 from app.user.utils.token_utils import TokenUtils
 from app.user.schemas import AuthLogin, AuthSignup, AuthResponse
+from app.config.config import Settings, settings
 
 
 class UserService:

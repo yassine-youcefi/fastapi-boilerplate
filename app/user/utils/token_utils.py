@@ -1,6 +1,6 @@
 import jwt
 import time 
-from app.config import settings
+from app.config.config import Settings, settings
 
 class TokenUtils:
     @staticmethod
@@ -19,4 +19,4 @@ class TokenUtils:
         except:
             print("Error decoding token")
             return None
-        
+

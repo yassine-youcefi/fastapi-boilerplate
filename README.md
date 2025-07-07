@@ -1,19 +1,24 @@
 # FastAPI Boilerplate
 
-A production-ready FastAPI backend template following best practices for structure, configuration, and development workflow.
+A robust, production-ready FastAPI backend template following best practices for structure, configuration, and development workflow.
 
-## Features
-- Modular project structure for scalability
-- API versioning
-- Centralized configuration using Pydantic
-- Alembic migrations for database management
-- JWT authentication ready
-- Pre-commit hooks for linting and formatting (`black`, `isort`, `flake8`)
-- Docker-ready
-- Async SQLAlchemy support
-- Environment variable management with `.env`
+---
 
-## Project Structure
+## 🚀 Features
+- **Modular project structure** for scalability and maintainability
+- **API versioning** for smooth upgrades
+- **Centralized configuration** using Pydantic
+- **Alembic migrations** for database schema management
+- **JWT authentication** ready
+- **Pre-commit hooks** for linting and formatting (`black`, `isort`, `flake8`)
+- **Docker & Docker Compose** support for local and production
+- **Async SQLAlchemy** support
+- **Environment variable management** with `.env`
+- **pgAdmin** integration for easy PostgreSQL management
+
+---
+
+## 🗂️ Project Structure
 ```
 fastapi-boilerplate/
 ├── alembic/                # Database migrations
@@ -34,18 +39,25 @@ fastapi-boilerplate/
 ├── Dockerfile              # Docker build file
 ├── docker-compose.yml      # Docker orchestration
 ├── env.example             # Example environment variables
+├── .env                    # Actual environment variables (not committed)
+├── .env.pgadmin            # pgAdmin environment variables
 └── README.md
 ```
 
-## Guidelines
+---
+
+## 📝 Guidelines
 - Use the app factory pattern (`main.py`) for flexibility.
 - Keep business logic modular (e.g., `user/`, `shop/`).
 - Store all configuration in `app/config/config.py` and use environment variables for secrets.
 - Use Alembic for all database migrations.
 - Enforce code quality with pre-commit hooks.
 - Use API versioning for all endpoints.
+- Use Docker Compose for local development and production parity.
 
-## How to Use
+---
+
+## ⚡ Quickstart
 
 ### 1. Clone and Install
 ```sh
@@ -67,12 +79,12 @@ cp env.example .env
 alembic upgrade head
 ```
 
-### 4. Run the App
+### 4. Run the App (Dev)
 ```sh
 uvicorn app.main:app --reload
 ```
 
-### 5. Run with Docker
+### 5. Run with Docker Compose
 ```sh
 docker-compose up --build
 ```
@@ -82,11 +94,41 @@ docker-compose up --build
 pre-commit install
 ```
 
-## Contributing
-- Follow the code style enforced by pre-commit hooks.
-- Write tests for new features in the `tests/` directory.
-- Use descriptive commit messages.
+### 7. Access pgAdmin (optional)
+- Visit [http://localhost:5050](http://localhost:5050)
+- Login with credentials from `.env.pgadmin`
+- Add a new server:
+  - **Host:** `db`
+  - **Port:** `5432`
+  - **Username:** from `.env`
+  - **Password:** from `.env`
 
 ---
 
-This project is inspired by [fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices).
+## 🧩 Alembic Migrations
+- All SQLAlchemy models in `app/user/models/` and other modules are auto-detected by Alembic.
+- To create a new migration after changing models:
+  ```sh
+  alembic revision --autogenerate -m "Describe your change"
+  alembic upgrade head
+  ```
+
+---
+
+## 🤝 Contributing
+- Follow the code style enforced by pre-commit hooks.
+- Write tests for new features in the `tests/` directory.
+- Use descriptive commit messages.
+- Open issues or pull requests for improvements.
+
+---
+
+## 📚 References
+- Inspired by [fastapi-best-practices](https://github.com/zhanymkanov/fastapi-best-practices)
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Alembic Documentation](https://alembic.sqlalchemy.org/)
+- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+
+---
+
+**Happy coding!**

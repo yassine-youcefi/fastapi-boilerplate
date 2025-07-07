@@ -2,8 +2,6 @@ from app.config.database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from app.config.config import Settings, settings
-
 
 class User(Base):
     """
@@ -24,16 +22,12 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    shop_id = Column(Integer, ForeignKey("shops.id", ondelete="SET NULL"), nullable=True)
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
     # Relationship with Role
     role = relationship("Role", back_populates="users", lazy="joined")
-    
-    # Relationship with Shop
-    shop = relationship("Shop", back_populates="users", lazy="joined")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, full_name={self.full_name}, role={self.role.name if self.role else None})>"

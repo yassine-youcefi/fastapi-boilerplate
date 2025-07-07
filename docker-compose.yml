@@ -8,15 +8,34 @@ services:
     env_file: .env
     ports:
       - "8000:8000"
-    
     command: >
       sh -c "if [ \"$APP_ENV\" = \"development\" ]; then \
         uvicorn app.main:app --reload --host 0.0.0.0 --port 8000; \
         else uvicorn app.main:app --host 0.0.0.0 --port 8000; fi"
     volumes:
       - .:/code
+    depends_on:
+      - db
     networks:
       - fastapi_network
+
+  db:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - fastapi_network
+
+volumes:
+  pgdata:
 
 networks:
   fastapi_network:

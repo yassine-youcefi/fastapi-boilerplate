@@ -1,11 +1,11 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from fastapi import status
-from app.user.exceptions import raise_predefined_http_exception, DuplicateUserEmailException, InvalidCredentialsException
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.user.models.user_models import User
 from app.user.utils.hash_utils import HashUtils
 from app.user.utils.token_utils import TokenUtils
 from app.user.schemas import AuthLogin, AuthSignup, AuthResponse
+from app.user.exceptions import raise_predefined_http_exception, DuplicateUserEmailException, InvalidCredentialsException, UserNotFoundException
 
 
 class UserService:
@@ -37,15 +37,14 @@ class UserService:
 
     async def get_user_by_email(self, email: str) -> User:
         result = await self.session.execute(select(User).filter_by(email=email))
-        return result.scalars().first()
+        user = result.scalars().first()
+        if not user:
+            raise_predefined_http_exception(UserNotFoundException(user_id=email))
+        return user
 
     async def get_user_by_id(self, user_id: int) -> User:
         result = await self.session.execute(select(User).filter_by(id=user_id))
-        return result.scalars().first()
-    
-    async def add_shop_to_user(self, user_id: int, shop_id: int) -> User:
-        user = await self.get_user_by_id(user_id=user_id)
-        user.shop_id = shop_id
-        await self.session.commit()
-        await self.session.refresh(user)
+        user = result.scalars().first()
+        if not user:
+            raise_predefined_http_exception(UserNotFoundException(user_id=user_id))
         return user

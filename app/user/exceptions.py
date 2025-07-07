@@ -3,7 +3,6 @@ from typing import Optional, List
 from pydantic import BaseModel
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 
 # Error Message Schema
@@ -40,6 +39,14 @@ class InvalidCredentialsException(Exception):
         self.status_code = status.HTTP_401_UNAUTHORIZED
         self.message = "Invalid email or password"
         self.error_code = "INVALID_CREDENTIALS"
+        
+class UserNotFoundException(Exception):
+    def __init__(self, user_id: int):
+        self.status_code = status.HTTP_404_NOT_FOUND
+        self.message = f"User with ID {user_id} not found"
+        self.error_code = "USER_NOT_FOUND"
+
+
 
 # Custom exception handler for HTTPException
 async def custom_http_exception_handler(request: Request, exc: HTTPException):

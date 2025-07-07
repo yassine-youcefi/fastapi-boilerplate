@@ -19,7 +19,7 @@ class UserService:
                 detail=f"User with email {signup_data.email} already exists",
                 error_code="DUPLICATE_USER_EMAIL"
             )
-        hashed_password = HashUtils.hash_password(password=signup_data.password)
+        hashed_password = await HashUtils.hash_password(password=signup_data.password)
         signup_data.password = hashed_password
         new_user = User(**signup_data.dict())
         self.session.add(new_user)
@@ -29,13 +29,13 @@ class UserService:
 
     async def login(self, login_data: AuthLogin) -> AuthResponse:
         user = await self.get_user_by_email(email=login_data.email)
-        if user is None or not HashUtils.check_password(password=login_data.password, hashed_password=user.password):
+        if user is None or not await HashUtils.check_password(password=login_data.password, hashed_password=user.password):
             raise raise_http_exception(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
                 error_code="INVALID_CREDENTIALS"
             )
-        token = TokenUtils.generate_token(user_id=user.id)
+        token = await TokenUtils.generate_token(user_id=user.id)
         return AuthResponse(access_token=token, token_type="bearer")
 
     async def user_exist_by_email(self, email: str) -> bool:

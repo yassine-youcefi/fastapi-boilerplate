@@ -41,8 +41,6 @@ class UserResponse(BaseModel):
     id: int
     full_name: str
     email: EmailStr
-    shop_id: Optional[int] = None
-
 
 class UserUpdate(BaseModel):
     id: int

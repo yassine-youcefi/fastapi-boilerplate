@@ -1,17 +1,16 @@
 from fastapi import Depends, HTTPException, status, Header
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Union
 from .token_utils import TokenUtils
 from app.user.services import UserService
 from app.user.schemas import UserResponse
 from app.config.database import get_db
-from app.config.config import Settings, settings
 
 AUTH_PREFIX = "Bearer "
 
 
-def get_request_user(
-        session: Session = Depends(get_db),
+async def get_request_user(
+        session: AsyncSession = Depends(get_db),
         authorization: Annotated[Union[str, None], Header()] = None) -> UserResponse:
 
     auth_exception = HTTPException(
@@ -27,8 +26,8 @@ def get_request_user(
 
     if payload and "user_id" in payload:
         user_service = UserService(session=session)
-        user = user_service.get_user_by_id(user_id=payload["user_id"])
+        user = await user_service.get_user_by_id(user_id=payload["user_id"])
         if user:
-            return UserResponse(id=user.id, full_name=user.full_name, email=user.email, shop_id=user.shop_id)
+            return UserResponse(id=user.id, full_name=user.full_name, email=user.email, shop_id=getattr(user, "shop_id", None))
 
     raise auth_exception

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     """
     PROJECT_NAME: str = "FastQR-Dine Backend"
     APP_ENV: str = "development"
+    ENVIRONMENT: str = "dev"  # Add this line to match .env
     DEBUG: bool = True
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
@@ -35,6 +36,6 @@ class Settings(BaseSettings):
     @property
     def SYNC_DATABASE_URL(self) -> str:
         """Get the sync database URL (with psycopg2 driver)"""
-        return f"postgresql://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 settings = Settings()

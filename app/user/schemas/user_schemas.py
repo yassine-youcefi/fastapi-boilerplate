@@ -42,6 +42,7 @@ class UserResponse(BaseModel):
     full_name: str
     email: EmailStr
 
+
 class UserUpdate(BaseModel):
     id: int
     full_name: Optional[str]
@@ -59,3 +60,4 @@ class UserUpdate(BaseModel):
         if len(v) < 8:
             raise ValueError("password must be at least 8 characters")
         return v
+

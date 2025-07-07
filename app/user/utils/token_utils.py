@@ -1,6 +1,6 @@
 import jwt
 import time 
-from src.config import settings
+from app.config import settings
 
 class TokenUtils:
     @staticmethod

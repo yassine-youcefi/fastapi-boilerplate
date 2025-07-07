@@ -29,30 +29,30 @@ global:
 
 paths:
 
-- path: src/**/routes/**
+- path: app/**/routes/**
   rules:
 
   - All routes must be in APIRouter and prefixed with version (e.g. /api/v1)
   - Never include business logic here — delegate to service layer
   - Use response_model and HTTP status codes
-- path: src/**/services/**
+- path: app/**/services/**
   rules:
 
   - Handle database operations and core business logic here
   - Raise domain exceptions from `exceptions/` module
   - Never depend on FastAPI objects here (no Request or Depends)
-- path: src/**/schemas/**
+- path: app/**/schemas/**
   rules:
 
   - Define Pydantic models for all input/output schemas
   - Use BaseModelConfig to control orm_mode, aliases, and validation behavior
-- path: src/**/models/**
+- path: app/**/models/**
   rules:
 
   - Use SQLAlchemy 2.0 declarative style
   - All models should inherit from Base
   - Annotate columns with `Mapped[]`
-- path: src/**/tasks/**
+- path: app/**/tasks/**
   rules:
 
   - Use Celery app and task decorators

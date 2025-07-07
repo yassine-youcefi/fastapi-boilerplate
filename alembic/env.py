@@ -30,10 +30,10 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
-from src.database import Base
-from src.user.models.user_models import User
-from src.shop.models.menu_models import Menu, MenuCategory
-from src.shop.models.shop_models import Shop, Slot, Theme
+from app.database import Base
+from app.user.models.user_models import User
+from app.shop.models.menu_models import Menu, MenuCategory
+from app.shop.models.shop_models import Shop, Slot, Theme
 
 target_metadata = Base.metadata
 

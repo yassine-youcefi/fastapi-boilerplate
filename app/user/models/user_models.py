@@ -1,4 +1,4 @@
-from src.database import Base
+from app.database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey

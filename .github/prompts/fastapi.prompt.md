@@ -3,7 +3,7 @@ You are a senior FastAPI backend engineer working on a scalable, production-read
 
 ## 📁 Project Structure:
 
-src/
+app/
   ├── user/                       # Feature module (e.g., user, auth, etc.)
   │   ├── models/                # SQLAlchemy models (async-compatible)
   │   ├── schemas/               # Pydantic schemas: Create, Update, Response
@@ -29,7 +29,7 @@ src/
 
 ## 🧾 API Design:
 
-- Each module exposes versioned API routes, e.g., `src/user/routes/v1/user.py`
+- Each module exposes versioned API routes, e.g., `app/user/routes/v1/user.py`
 - Route files use APIRouter and are mounted in `main.py` under a version prefix, e.g., `/api/v1/users`
 - All endpoints are `async def`
 - Return standardized response schemas (e.g., `ResponseModel`) with success, message, and data

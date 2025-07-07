@@ -2,9 +2,9 @@ from fastapi import Depends, HTTPException, status, Header
 from sqlalchemy.orm import Session
 from typing import Annotated, Union
 from .token_utils import TokenUtils
-from src.user.services import UserService
-from src.user.schemas import UserResponse
-from src.database import get_db
+from app.user.services import UserService
+from app.user.schemas import UserResponse
+from app.database import get_db
 
 AUTH_PREFIX = "Bearer "
 

@@ -11,8 +11,8 @@ services:
     
     command: >
       sh -c "if [ \"$APP_ENV\" = \"development\" ]; then \
-        uvicorn src.main:app --reload --host 0.0.0.0 --port 8000; \
-        else uvicorn src.main:app --host 0.0.0.0 --port 8000; fi"
+        uvicorn app.main:app --reload --host 0.0.0.0 --port 8000; \
+        else uvicorn app.main:app --host 0.0.0.0 --port 8000; fi"
     volumes:
       - .:/code
     networks:

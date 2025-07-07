@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from src.api.v1.api_router import api_router
+from app.api.v1.api_router import api_router
 
 
 def create_app() -> FastAPI:

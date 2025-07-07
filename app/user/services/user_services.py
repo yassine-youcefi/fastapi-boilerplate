@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from fastapi import status
-from src.exceptions import raise_http_exception
-from src.user.models.user_models import User
-from src.user.utils.hash_utils import HashUtils
-from src.user.utils.token_utils import TokenUtils
-from src.user.schemas import AuthLogin, AuthSignup, AuthResponse
+from app.exceptions import raise_http_exception
+from app.user.models.user_models import User
+from app.user.utils.hash_utils import HashUtils
+from app.user.utils.token_utils import TokenUtils
+from app.user.schemas import AuthLogin, AuthSignup, AuthResponse
 
 
 class UserService:

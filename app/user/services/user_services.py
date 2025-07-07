@@ -13,7 +13,7 @@ class UserService:
         self.session = session
 
     async def signup(self, signup_data: AuthSignup) -> User:
-        if await self.user_exist_by_email(email=signup_data.email):
+        if await self.user_exists_by_email(email=signup_data.email):
             raise raise_http_exception(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"User with email {signup_data.email} already exists",
@@ -38,7 +38,7 @@ class UserService:
         token = await TokenUtils.generate_token(user_id=user.id)
         return AuthResponse(access_token=token, token_type="bearer")
 
-    async def user_exist_by_email(self, email: str) -> bool:
+    async def user_exists_by_email(self, email: str) -> bool:
         result = await self.session.execute(select(User).filter_by(email=email))
         user = result.scalars().first()
         return user is not None

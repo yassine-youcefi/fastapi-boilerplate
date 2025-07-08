@@ -4,8 +4,8 @@ import secrets
 from typing import Tuple
 from datetime import datetime, timedelta, timezone
 from starlette.concurrency import run_in_threadpool
-
 from app.config.config import settings
+import pytz
 
 
 class TokenUtils:
@@ -44,7 +44,8 @@ class TokenUtils:
             jwt.encode, payload, settings.JWT_SECRET, settings.JWT_ALGORITHM
         )
         # Use the configured server timezone (UTC+4)
-        expires_at = datetime.fromtimestamp(expires_at_ts)
+        tz = pytz.timezone('Asia/Dubai')
+        expires_at = datetime.fromtimestamp(expires_at_ts, tz)
         return token, expires_at
 
     @staticmethod
@@ -60,5 +61,6 @@ class TokenUtils:
         if expires_in is None:
             expires_in = settings.JWT_REFRESH_EXPIRES_IN
         token = secrets.token_urlsafe(64)
-        expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        tz = pytz.timezone('Asia/Dubai')
+        expires_at = datetime.now(tz) + timedelta(seconds=expires_in)
         return token, expires_at

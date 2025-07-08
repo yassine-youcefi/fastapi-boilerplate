@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.config.database import Base
+from app.config.timezone_utils import get_dubai_now
 
 class AccessToken(Base):
     """
@@ -12,7 +13,7 @@ class AccessToken(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     token = Column(String, nullable=False, unique=True, index=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
@@ -23,6 +24,8 @@ class AccessToken(Base):
         expires_at = kwargs.get('expires_at')
         if expires_at is None:
             raise ValueError("expires_at must be provided for AccessToken and cannot be None.")
+        if 'created_at' not in kwargs or kwargs['created_at'] is None:
+            kwargs['created_at'] = get_dubai_now()
         super().__init__(*args, **kwargs)
 
 
@@ -36,7 +39,7 @@ class RefreshToken(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     access_token_id = Column(Integer, ForeignKey("access_tokens.id", ondelete="CASCADE"), nullable=True, index=True)
     token = Column(String, nullable=False, unique=True, index=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
@@ -47,4 +50,6 @@ class RefreshToken(Base):
         expires_at = kwargs.get('expires_at')
         if expires_at is None:
             raise ValueError("expires_at must be provided for RefreshToken and cannot be None.")
+        if 'created_at' not in kwargs or kwargs['created_at'] is None:
+            kwargs['created_at'] = get_dubai_now()
         super().__init__(*args, **kwargs)

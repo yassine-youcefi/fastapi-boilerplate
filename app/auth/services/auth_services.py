@@ -10,7 +10,6 @@ from app.user.schemas import UserResponse
 from app.user.services.user_services import UserService
 from app.exceptions import raise_predefined_http_exception
 from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException
-from typing import Any
 from app.auth.models.token_models import AccessToken, RefreshToken
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,8 @@ class AuthService:
         access_token_obj = AccessToken(
             user_id=user_id, 
             token=access_token, 
-            expires_at=access_expires_at
+            expires_at=access_expires_at,
+            # created_at will be set to Dubai time by the model
         )
         self.session.add(access_token_obj)
         await self.session.flush()
@@ -53,7 +53,8 @@ class AuthService:
             user_id=user_id,
             access_token_id=access_token_obj.id,
             token=refresh_token,
-            expires_at=refresh_expires_at
+            expires_at=refresh_expires_at,
+            # created_at will be set to Dubai time by the model
         )
         self.session.add(refresh_token_obj)
         await self.session.commit()

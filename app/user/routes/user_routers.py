@@ -1,30 +1,8 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from app.user.dependencies import get_user_service
-from app.user.schemas import (AuthSignup, AuthLogin, AuthResponse, UserResponse,)
+from app.user.schemas import UserResponse
 
 user_router = APIRouter()
-
-@user_router.post(
-    "/login",
-    response_model=AuthResponse,
-    status_code=status.HTTP_200_OK,
-    description="Authenticate user and return JWT token.",
-    summary="User Login",
-)
-async def login(login_data: AuthLogin, user_service=Depends(get_user_service)):
-    return await user_service.login(login_data=login_data)
-
-
-@user_router.post(
-    "/signup",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED,
-    description="Register a new user.",
-    summary="User Signup",
-)
-async def signup(signup_data: AuthSignup, user_service=Depends(get_user_service)):
-    return await user_service.signup(signup_data=signup_data)
-
 
 @user_router.get(
     "/details/{user_id}",
@@ -34,4 +12,10 @@ async def signup(signup_data: AuthSignup, user_service=Depends(get_user_service)
     summary="Get User Details",
 )
 async def get_user_details(user_id: int, user_service=Depends(get_user_service)):
-    return await user_service.get_user_by_id(user_id=user_id)
+    user = await user_service.get_user_by_id(user_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail=[{"error_code": "NOT_FOUND", "message": f"User with id {user_id} not found."}]
+        )
+    return user

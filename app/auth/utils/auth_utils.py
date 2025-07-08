@@ -2,12 +2,11 @@ from fastapi import Depends, HTTPException, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated, Union
 from .token_utils import TokenUtils
-from app.user.services import UserService
+from app.auth.services.auth_services import AuthService
 from app.user.schemas import UserResponse
 from app.config.database import get_db
 
 AUTH_PREFIX = "Bearer "
-
 
 async def get_request_user(
         session: AsyncSession = Depends(get_db),
@@ -21,12 +20,12 @@ async def get_request_user(
     if not authorization or not authorization.startswith(AUTH_PREFIX):
         raise auth_exception
 
-    payload = TokenUtils.decode_token(
+    payload = await TokenUtils.decode_token(
         token=authorization.replace(AUTH_PREFIX, "").strip())
 
     if payload and "user_id" in payload:
-        user_service = UserService(session=session)
-        user = await user_service.get_user_by_id(user_id=payload["user_id"])
+        auth_service = AuthService(session=session)
+        user = await auth_service.get_user_by_id(user_id=payload["user_id"])
         if user:
             return UserResponse(id=user.id, full_name=user.full_name, email=user.email, shop_id=getattr(user, "shop_id", None))
 

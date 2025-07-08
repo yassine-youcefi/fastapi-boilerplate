@@ -8,10 +8,12 @@ services:
     env_file: .env
     ports:
       - "8000:8000"
+    environment:
+      - LOG_LEVEL=debug
     command: >
       sh -c "if [ \"$APP_ENV\" = \"development\" ]; then \
-        uvicorn app.main:app --reload --host 0.0.0.0 --port 8000; \
-        else uvicorn app.main:app --host 0.0.0.0 --port 8000; fi"
+        uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-level debug; \
+        else uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level debug; fi"
     volumes:
       - .:/code
     depends_on:
@@ -27,6 +29,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ: Asia/Dubai
       PGTZ: Asia/Dubai
     ports:
       - "5432:5432"
@@ -34,7 +37,8 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - fastapi_network
-    
+    command: ["postgres", "-c", "timezone=Asia/Dubai"]
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin4

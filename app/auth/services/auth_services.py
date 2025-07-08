@@ -44,7 +44,6 @@ class AuthService:
             user_id=user_id, 
             token=access_token, 
             expires_at=access_expires_at,
-            # created_at will be set to Dubai time by the model
         )
         self.session.add(access_token_obj)
         await self.session.flush()
@@ -55,7 +54,6 @@ class AuthService:
             access_token_id=access_token_obj.id,
             token=refresh_token,
             expires_at=refresh_expires_at,
-            # created_at will be set to Dubai time by the model
         )
         self.session.add(refresh_token_obj)
         await self.session.commit()
@@ -125,14 +123,23 @@ class AuthService:
         """
         # Find the refresh token in DB
         result = await self.session.execute(
-            RefreshToken.__table__.select().where(RefreshToken.token == refresh_data.refresh_token, RefreshToken.is_active == True)
+            RefreshToken.__table__.select().where(RefreshToken.token == refresh_data.refresh_token)
         )
         db_refresh_token = result.fetchone()
         if not db_refresh_token:
             raise_predefined_http_exception(InvalidTokenException())
-        # Optionally: deactivate the old refresh token
+        # Check expiry
+        from datetime import datetime, timezone
+        if db_refresh_token.expires_at < datetime.now(timezone.utc):
+            # Delete expired token
+            await self.session.execute(
+                RefreshToken.__table__.delete().where(RefreshToken.token == refresh_data.refresh_token)
+            )
+            await self.session.commit()
+            raise_predefined_http_exception(InvalidTokenException())
+        # Delete the old refresh token (used or valid)
         await self.session.execute(
-            RefreshToken.__table__.update().where(RefreshToken.token == refresh_data.refresh_token).values(is_active=False)
+            RefreshToken.__table__.delete().where(RefreshToken.token == refresh_data.refresh_token)
         )
         await self.session.commit()
         # Generate new tokens

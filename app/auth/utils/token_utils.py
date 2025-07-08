@@ -43,10 +43,11 @@ class TokenUtils:
         token = await run_in_threadpool(
             jwt.encode, payload, settings.JWT_SECRET, settings.JWT_ALGORITHM
         )
-        # Use the configured server timezone (UTC+4)
-        tz = pytz.timezone('Asia/Dubai')
-        expires_at = datetime.fromtimestamp(expires_at_ts, tz)
-        return token, expires_at
+
+        expires_at = datetime.fromtimestamp(expires_at_ts, tz=pytz.timezone('Asia/Dubai'))
+        # Convert to UTC before saving to DB
+        expires_at_utc = expires_at.astimezone(timezone.utc)
+        return token, expires_at_utc
 
     @staticmethod
     async def generate_refresh_token(user_id: int, expires_in: int = None) -> Tuple[str, datetime]:
@@ -61,6 +62,7 @@ class TokenUtils:
         if expires_in is None:
             expires_in = settings.JWT_REFRESH_EXPIRES_IN
         token = secrets.token_urlsafe(64)
-        tz = pytz.timezone('Asia/Dubai')
-        expires_at = datetime.now(tz) + timedelta(seconds=expires_in)
-        return token, expires_at
+        expires_at = datetime.now(pytz.timezone('Asia/Dubai')) + timedelta(seconds=expires_in)
+        # Convert to UTC before saving to DB
+        expires_at_utc = expires_at.astimezone(timezone.utc)
+        return token, expires_at_utc

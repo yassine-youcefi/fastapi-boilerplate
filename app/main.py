@@ -7,6 +7,9 @@ from app.user.routes.user_routers import user_router
 from app.auth.routes.auth_routers import auth_router
 from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 # Load environment configuration
 config = Config(".env")
 ENVIRONMENT = config("ENVIRONMENT", cast=str, default="dev")

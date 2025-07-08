@@ -3,8 +3,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.sql import func
-import datetime
-from app.config.timezone_utils import get_dubai_now
 
 class User(Base):
     """
@@ -29,14 +27,12 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
     # Relationship with Role
     role = relationship("Role", back_populates="users", lazy="joined")
 
     def __init__(self, *args, **kwargs):
-        if 'created_at' not in kwargs or kwargs['created_at'] is None:
-            kwargs['created_at'] = get_dubai_now()
         super().__init__(*args, **kwargs)
 
     def __repr__(self):

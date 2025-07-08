@@ -4,7 +4,6 @@ from app.user.models.user_models import User
 from app.exceptions import raise_predefined_http_exception
 from app.user.exceptions import UserNotFoundException
 from typing import Optional
-from app.config.timezone_utils import get_dubai_now
 
 
 class UserService:

@@ -17,6 +17,8 @@ WORKDIR /code
 
 # Copy requirements file separately to leverage Docker cache
 COPY requirements.txt /code/
+
+# Install dependencies (no need for distutils/setuptools for redis[asyncio])
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
@@ -25,10 +27,8 @@ COPY . /code/
 
 # Change ownership to the created user
 RUN chown -R fastapi /code
-
 # Make sure the user has write access to the /code directory
 RUN chmod -R u+w /code
-
 # Switch to the newly created user
 USER fastapi
 

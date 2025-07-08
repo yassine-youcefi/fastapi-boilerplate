@@ -26,6 +26,12 @@ class Settings(BaseSettings):
     DB_TIMEOUT: int = 30
     SERVER_TIMEZONE: str = "UTC+4"
 
+    # Redis configuration
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_URL: Optional[str] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -40,5 +46,12 @@ class Settings(BaseSettings):
     def SYNC_DATABASE_URL(self) -> str:
         """Get the sync database URL (with psycopg2 driver)"""
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    def REDIS_URI(self) -> str:
+        """Get the Redis URI"""
+        if self.REDIS_URL:
+            return self.REDIS_URL
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
 settings = Settings()

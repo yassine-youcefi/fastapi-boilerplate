@@ -1,19 +1,21 @@
+import logging
 from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 from starlette.config import Config
-from fastapi import Request
+
 from app.user.routes.user_routers import user_router
 from app.auth.routes.auth_routers import auth_router
 from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
+from app.utils.redis_cache import RedisCache
+from app.config.config import settings
 
-import logging
 logging.basicConfig(level=logging.DEBUG)
 
 # Load environment configuration
 config = Config(".env")
 ENVIRONMENT = config("ENVIRONMENT", cast=str, default="dev")
-SHOW_DOCS_ENVIRONMENT = ("dev", "test")  # Only show docs in dev and test
+SHOW_DOCS_ENVIRONMENT = ("dev", "test") 
 
 app_configs = {
     "title": "Fastapi Boilerplate",
@@ -25,6 +27,8 @@ if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["openapi_url"] = None
     app_configs["docs_url"] = None
     app_configs["redoc_url"] = None
+
+redis_cache = RedisCache(url=settings.REDIS_URI)
 
 
 def create_app() -> FastAPI:
@@ -42,6 +46,23 @@ def create_app() -> FastAPI:
     @app.get("/")
     async def read_root():
         return {"Hello": "World"}
+
+    @app.on_event("startup")
+    async def startup_event():
+        await redis_cache.connect()
+
+    @app.on_event("shutdown")
+    async def shutdown_event():
+        await redis_cache.close()
+
+    # Example usage for caching a response
+    @app.get("/cache-example")
+    async def cache_example():
+        cached = await redis_cache.get("example_key")
+        if cached:
+            return {"cached": True, "value": cached}
+        await redis_cache.set("example_key", "hello from redis!", expire=60)
+        return {"cached": False, "value": "hello from redis!"}
 
     return app
 

@@ -1,21 +1,44 @@
 # FastAPI Boilerplate
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A robust, production-ready FastAPI backend template following best practices for structure, configuration, and development workflow.
 
 ---
 
+## 📦 Tech Stack
+- **FastAPI**
+- **SQLAlchemy (Async)**
+- **Alembic**
+- **PostgreSQL**
+- **Docker & Docker Compose**
+- **Redis**
+- **pgAdmin**
+- **Pydantic**
+- **Pre-commit hooks**
+
+---
+
 ## 🚀 Features
-- **Modular project structure** for scalability and maintainability
-- **API versioning** for smooth upgrades
-- **Centralized configuration** using Pydantic
-- **Alembic migrations** for database schema management
-- **JWT authentication** ready
-- **Pre-commit hooks** for linting and formatting (`black`, `isort`, `flake8`)
-- **Docker & Docker Compose** support for local and production
-- **Async SQLAlchemy** support
-- **Environment variable management** with `.env`
-- **pgAdmin** integration for easy PostgreSQL management
-- **Consistent error responses** with a top-level `errors` array
+- Modular project structure for scalability and maintainability
+- API versioning for smooth upgrades
+- Centralized configuration using Pydantic
+- Alembic migrations for database schema management
+- JWT authentication ready
+- Pre-commit hooks for linting and formatting (`black`, `isort`, `flake8`)
+- Docker & Docker Compose support for local and production
+- Async SQLAlchemy support
+- Environment variable management with `.env`
+- pgAdmin integration for easy PostgreSQL management
+- Consistent error responses with a top-level `errors` array
+
+---
+
+## 🛠️ Requirements
+- Python 3.10+
+- Docker & Docker Compose (for containerized development)
+- PostgreSQL (local or Docker)
 
 ---
 
@@ -24,40 +47,36 @@ A robust, production-ready FastAPI backend template following best practices for
 fastapi-boilerplate/
 ├── alembic/                # Database migrations
 ├── app/
-│   ├── api/                # API routers (versioned)
+│   ├── auth/               # Authentication domain logic
+│   │   ├── models/         # Auth models
+│   │   ├── routes/         # Auth routes
+│   │   ├── schemas/        # Auth schemas
+│   │   ├── services/       # Auth services
+│   │   ├── tasks/          # Auth background tasks
+│   │   └── utils/          # Auth utilities
+│   ├── user/               # User domain logic
+│   │   ├── models/         # User models
+│   │   ├── routes/         # User routes
+│   │   ├── schemas/        # User schemas
+│   │   ├── services/       # User services
+│   │   ├── tasks/          # User background tasks
+│   │   └── utils/          # User utilities
 │   ├── config/             # Configuration files
-│   │   └── config.py       # Main app settings
-│   ├── database.py         # Database connection setup
+│   ├── utils/              # Shared utilities (e.g., redis_cache)
 │   ├── main.py             # App entrypoint
-│   ├── pagination.py       # Pagination utilities
-│   ├── shop/               # Shop domain logic
-│   └── user/               # User domain logic
-│       ├── exceptions.py   # User-specific exception handling
-│       ├── dependencies.py # User dependencies
-│       └── ...             # Models, routes, schemas, services, utils
+│   ├── dependencies.py     # Dependency injection
+│   └── pagination.py       # Pagination utilities
 ├── scripts/                # Utility scripts
 ├── tests/                  # Test suite
 ├── requirements.txt        # Python dependencies
-├── .pre-commit-config.yaml # Pre-commit hooks config
 ├── Dockerfile              # Docker build file
 ├── docker-compose.yml      # Docker orchestration
 ├── env.example             # Example environment variables
 ├── .env                    # Actual environment variables (not committed)
 ├── .env.pgadmin            # pgAdmin environment variables
+├── alembic.ini             # Alembic config
 └── README.md
 ```
-
----
-
-## 📝 Guidelines
-- Use the app factory pattern (`main.py`) for flexibility.
-- Keep business logic modular (e.g., `user/`, `shop/`).
-- Store all configuration in `app/config/config.py` and use environment variables for secrets.
-- Use Alembic for all database migrations.
-- Enforce code quality with pre-commit hooks.
-- Use API versioning for all endpoints.
-- Use Docker Compose for local development and production parity.
-- All API errors are returned as a top-level `errors` array for consistency.
 
 ---
 
@@ -110,7 +129,7 @@ pre-commit install
 ---
 
 ## 🧩 Alembic Migrations
-- All SQLAlchemy models in `app/user/models/` and other modules are auto-detected by Alembic.
+- All SQLAlchemy models in `app/user/models/`, `app/auth/models/`, and other modules are auto-detected by Alembic.
 - To create a new migration after changing models:
   ```sh
   alembic revision --autogenerate -m "Describe your change"
@@ -126,12 +145,38 @@ pre-commit install
     "errors": [
       {
         "error_code": "DUPLICATE_USER_EMAIL",
-        "message": "User with email yani2@skyloov.com already exists"
+        "message": "User with email example@domain.com already exists"
       }
     ]
   }
   ```
 - Validation errors and custom exceptions follow this format for consistency and easy frontend integration.
+
+---
+
+## 🔑 Example: Authentication API Usage
+
+### Register
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "yourpassword"
+}
+```
+
+### Login
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "yourpassword"
+}
+```
 
 ---
 
@@ -148,6 +193,12 @@ pre-commit install
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Alembic Documentation](https://alembic.sqlalchemy.org/)
 - [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 

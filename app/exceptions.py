@@ -48,7 +48,7 @@ def raise_predefined_http_exception(exc: Exception) -> None:
     Args:
         exc (Exception): The custom exception instance.
     """
-    raise raise_http_exception(
+    raise_http_exception(
         status_code=getattr(exc, "status_code", 400),
         message=getattr(exc, "message", str(exc)),
         error_code=getattr(exc, "error_code", "APP_ERROR")

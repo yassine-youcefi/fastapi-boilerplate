@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.config.database import Base
-from app.config.config import settings  # Import settings for TZINFO
 
 class AccessToken(Base):
     """
@@ -48,15 +47,4 @@ class RefreshToken(Base):
         expires_at = kwargs.get('expires_at')
         if expires_at is None:
             raise ValueError("expires_at must be provided for RefreshToken and cannot be None.")
-        if expires_at.tzinfo is None or expires_at.tzinfo.utcoffset(expires_at) != settings.TZINFO.utcoffset(None):
-            expires_at = expires_at.astimezone(settings.TZINFO)
-            kwargs['expires_at'] = expires_at
-        created_at = kwargs.get('created_at')
-        from datetime import datetime
-        if created_at is None:
-            created_at = datetime.now(settings.TZINFO)
-            kwargs['created_at'] = created_at
-        elif created_at.tzinfo is None or created_at.tzinfo.utcoffset(created_at) != settings.TZINFO.utcoffset(None):
-            created_at = created_at.astimezone(settings.TZINFO)
-            kwargs['created_at'] = created_at
         super().__init__(*args, **kwargs)

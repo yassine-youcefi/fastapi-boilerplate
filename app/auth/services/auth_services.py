@@ -4,12 +4,13 @@ from app.user.models.user_models import User
 from app.auth.utils.hash_utils import HashUtils
 from app.auth.utils.token_utils import TokenUtils
 from app.auth.schemas.auth_schemas import (
-    AuthLoginRequest, AuthLoginResponse, AuthSignupRequest, AuthSignupResponse
+    AuthLoginRequest, AuthLoginResponse, AuthSignupRequest, AuthSignupResponse,
+    RefreshTokenRequest, RefreshTokenResponse
 )
 from app.user.schemas import UserResponse
 from app.user.services.user_services import UserService
 from app.exceptions import raise_predefined_http_exception
-from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException
+from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException, InvalidTokenException
 from app.auth.models.token_models import AccessToken, RefreshToken
 
 logger = logging.getLogger(__name__)
@@ -116,4 +117,28 @@ class AuthService:
             access_token=access_token,
             token_type="bearer",
             refresh_token=refresh_token
+        )
+
+    async def refresh_token(self, refresh_data: RefreshTokenRequest) -> RefreshTokenResponse:
+        """
+        Validate refresh token, generate new access and refresh tokens, and return them.
+        """
+        # Find the refresh token in DB
+        result = await self.session.execute(
+            RefreshToken.__table__.select().where(RefreshToken.token == refresh_data.refresh_token, RefreshToken.is_active == True)
+        )
+        db_refresh_token = result.fetchone()
+        if not db_refresh_token:
+            raise_predefined_http_exception(InvalidTokenException())
+        # Optionally: deactivate the old refresh token
+        await self.session.execute(
+            RefreshToken.__table__.update().where(RefreshToken.token == refresh_data.refresh_token).values(is_active=False)
+        )
+        await self.session.commit()
+        # Generate new tokens
+        user_id = db_refresh_token.user_id
+        access_token, new_refresh_token = await self._generate_tokens(user_id=user_id)
+        return RefreshTokenResponse(
+            access_token=access_token,
+            refresh_token=new_refresh_token
         )

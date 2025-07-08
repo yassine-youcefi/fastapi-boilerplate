@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, status
 from app.auth.dependencies import get_auth_service
 from app.auth.schemas.auth_schemas import (
     AuthSignupRequest, AuthSignupResponse,
-    AuthLoginRequest, AuthLoginResponse
+    AuthLoginRequest, AuthLoginResponse,
+    RefreshTokenRequest, RefreshTokenResponse
 )
 from app.auth.services.auth_services import AuthService
 from typing import Any
@@ -34,3 +35,16 @@ async def signup(
     auth_service: AuthService = Depends(get_auth_service)
 ) -> Any:
     return await auth_service.signup(signup_data=signup_data)
+
+@auth_router.post(
+    "/refresh-token",
+    response_model=RefreshTokenResponse,
+    status_code=status.HTTP_200_OK,
+    description="Refresh JWT access and refresh tokens.",
+    summary="Refresh Token",
+)
+async def refresh_token(
+    refresh_data: RefreshTokenRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+) -> Any:
+    return await auth_service.refresh_token(refresh_data=refresh_data)

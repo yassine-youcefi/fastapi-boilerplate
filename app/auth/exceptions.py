@@ -30,3 +30,17 @@ class InvalidCredentialsException(AppBaseException):
             error_code="INVALID_CREDENTIALS",
             status_code=status.HTTP_401_UNAUTHORIZED
         )
+
+class InvalidTokenException(AppBaseException):
+    """
+    Exception raised when a token is invalid or cannot be decoded.
+    """
+    def __init__(self) -> None:
+        """
+        Initialize the exception for invalid tokens.
+        """
+        super().__init__(
+            message="Invalid or expired token",
+            error_code="INVALID_TOKEN",
+            status_code=status.HTTP_401_UNAUTHORIZED
+        )

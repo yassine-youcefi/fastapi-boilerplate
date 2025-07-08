@@ -3,7 +3,7 @@ from app.user.models.user_models import User
 from app.auth.utils.hash_utils import HashUtils
 from app.auth.utils.token_utils import TokenUtils
 from app.auth.schemas.auth_schemas import (
-    AuthLoginRequest, AuthLoginResponse, AuthRegisterRequest, AuthRegisterResponse
+    AuthLoginRequest, AuthLoginResponse, AuthSignupRequest, AuthSignupResponse
 )
 from app.user.schemas import UserResponse
 from app.user.services.user_services import UserService
@@ -25,13 +25,13 @@ class AuthService:
         self.session = session
         self.user_service = UserService(session)
 
-    async def signup(self, signup_data: AuthRegisterRequest) -> AuthRegisterResponse:
+    async def signup(self, signup_data: AuthSignupRequest) -> AuthSignupResponse:
         """
         Register a new user. Hashes the password and saves the user to the database.
         Args:
-            signup_data (AuthRegisterRequest): The registration data for the new user.
+            signup_data (AuthSignupRequest): The registration data for the new user.
         Returns:
-            AuthRegisterResponse: The response containing the new user's info.
+            AuthSignupResponse: The response containing the new user's info.
         Raises:
             DuplicateUserEmailException: If a user with the given email already exists.
         """
@@ -43,10 +43,11 @@ class AuthService:
         self.session.add(new_user)
         await self.session.commit()
         await self.session.refresh(new_user)
-        return AuthRegisterResponse(
-            id=new_user.id,
-            full_name=new_user.full_name,
-            email=new_user.email
+        token: str = await TokenUtils.generate_token(user_id=new_user.id)
+        return AuthSignupResponse(
+            user=UserResponse(id=new_user.id, full_name=new_user.full_name, email=new_user.email),
+            access_token=token,
+            token_type="bearer"
         )
 
     async def login(self, login_data: AuthLoginRequest) -> AuthLoginResponse:

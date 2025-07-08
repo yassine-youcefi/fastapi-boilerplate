@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
 from app.user.schemas.user_schemas import UserResponse
 
-class AuthRegisterRequest(BaseModel):
+class AuthSignupRequest(BaseModel):
     full_name: str
     email: EmailStr
     password: str
@@ -34,5 +34,7 @@ class AuthLoginResponse(BaseModel):
     access_token: str
     token_type: str
 
-class AuthRegisterResponse(UserResponse):
-    pass
+class AuthSignupResponse(BaseModel):
+    user: UserResponse
+    access_token: str
+    token_type: str

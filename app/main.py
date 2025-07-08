@@ -30,6 +30,9 @@ if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
 
 redis_cache = RedisCache(url=settings.REDIS_URI)
 
+def get_redis_cache() -> RedisCache:
+    return redis_cache
+
 
 def create_app() -> FastAPI:
     """App factory for FastAPI application."""

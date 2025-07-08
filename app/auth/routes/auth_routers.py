@@ -4,6 +4,8 @@ from app.auth.schemas.auth_schemas import (
     AuthRegisterRequest, AuthRegisterResponse,
     AuthLoginRequest, AuthLoginResponse
 )
+from app.auth.services.auth_services import AuthService
+from typing import Any
 
 auth_router = APIRouter()
 
@@ -14,7 +16,10 @@ auth_router = APIRouter()
     description="Authenticate user and return JWT token and user info.",
     summary="User Login",
 )
-async def login(login_data: AuthLoginRequest, auth_service=Depends(get_auth_service)):
+async def login(
+    login_data: AuthLoginRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+) -> Any:
     return await auth_service.login(login_data=login_data)
 
 @auth_router.post(
@@ -24,5 +29,8 @@ async def login(login_data: AuthLoginRequest, auth_service=Depends(get_auth_serv
     description="Register a new user.",
     summary="User Signup",
 )
-async def signup(signup_data: AuthRegisterRequest, auth_service=Depends(get_auth_service)):
+async def signup(
+    signup_data: AuthRegisterRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+) -> Any:
     return await auth_service.signup(signup_data=signup_data)

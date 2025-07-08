@@ -9,7 +9,7 @@ class AppBaseException(Exception):
     error_code: str = "APP_ERROR"
     message: str = "An error occurred."
 
-    def __init__(self, message: Optional[str] = None, error_code: Optional[str] = None, status_code: Optional[int] = None):
+    def __init__(self, message: Optional[str] = None, error_code: Optional[str] = None, status_code: Optional[int] = None) -> None:
         if message:
             self.message = message
         if error_code:
@@ -18,13 +18,13 @@ class AppBaseException(Exception):
             self.status_code = status_code
 
 # Utility to raise HTTPException with your schema
-def raise_http_exception(status_code: int, message: str, error_code: Optional[str] = None):
+def raise_http_exception(status_code: int, message: str, error_code: Optional[str] = None) -> None:
     raise HTTPException(
         status_code=status_code,
         detail=[{"error_code": error_code, "message": message}]
     )
 
-def raise_predefined_http_exception(exc: Exception):
+def raise_predefined_http_exception(exc: Exception) -> None:
     raise raise_http_exception(
         status_code=getattr(exc, "status_code", 400),
         message=getattr(exc, "message", str(exc)),
@@ -32,7 +32,7 @@ def raise_predefined_http_exception(exc: Exception):
     )
 
 # Centralized custom exception handler
-async def custom_http_exception_handler(request: Request, exc: Exception):
+async def custom_http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     # Handle FastAPI/Starlette HTTPException
     if isinstance(exc, HTTPException):
         detail = exc.detail
@@ -66,7 +66,7 @@ async def custom_http_exception_handler(request: Request, exc: Exception):
     )
 
 # Custom exception handler for validation errors
-async def custom_validation_exception_handler(request: Request, exc: FastAPIRequestValidationError):
+async def custom_validation_exception_handler(request: Request, exc: FastAPIRequestValidationError) -> JSONResponse:
     errors = [
         {"error_code": "VALIDATION_ERROR", "message": err["msg"]} for err in exc.errors()
     ]

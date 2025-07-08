@@ -9,6 +9,7 @@ from app.user.schemas import UserResponse
 from app.user.services.user_services import UserService
 from app.exceptions import raise_predefined_http_exception
 from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException
+from typing import Any
 
 class AuthService:
     def __init__(self, session: AsyncSession) -> None:
@@ -18,7 +19,7 @@ class AuthService:
     async def signup(self, signup_data: AuthRegisterRequest) -> AuthRegisterResponse:
         if await self.user_service.user_exists_by_email(email=signup_data.email):
             raise_predefined_http_exception(DuplicateUserEmailException(signup_data.email))
-        hashed_password = await HashUtils.hash_password(password=signup_data.password)
+        hashed_password: str = await HashUtils.hash_password(password=signup_data.password)
         signup_data.password = hashed_password
         new_user = User(**signup_data.dict())
         self.session.add(new_user)
@@ -31,10 +32,10 @@ class AuthService:
         )
 
     async def login(self, login_data: AuthLoginRequest) -> AuthLoginResponse:
-        user = await self.user_service.get_user_by_email(email=login_data.email)
+        user: User = await self.user_service.get_user_by_email(email=login_data.email)
         if user is None or not await HashUtils.check_password(password=login_data.password, hashed_password=user.password):
             raise_predefined_http_exception(InvalidCredentialsException())
-        token = await TokenUtils.generate_token(user_id=user.id)
+        token: str = await TokenUtils.generate_token(user_id=user.id)
         return AuthLoginResponse(
             user=UserResponse(id=user.id, full_name=user.full_name, email=user.email),
             access_token=token,

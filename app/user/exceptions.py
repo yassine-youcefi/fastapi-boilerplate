@@ -3,7 +3,7 @@ from app.exceptions import AppBaseException
 
 
 class UserNotFoundException(AppBaseException):
-    def __init__(self, user_id: int):
+    def __init__(self, user_id: int) -> None:
         super().__init__(
             message=f"User with ID {user_id} not found",
             error_code="USER_NOT_FOUND",

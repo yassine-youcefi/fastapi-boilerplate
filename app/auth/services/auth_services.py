@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.user.models.user_models import User
 from app.auth.utils.hash_utils import HashUtils
@@ -10,7 +11,9 @@ from app.user.services.user_services import UserService
 from app.exceptions import raise_predefined_http_exception
 from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException
 from typing import Any
-from app.auth.models.access_token import AccessToken
+from app.auth.models.token_models import AccessToken, RefreshToken
+
+logger = logging.getLogger(__name__)
 
 class AuthService:
     """
@@ -26,19 +29,35 @@ class AuthService:
         self.session = session
         self.user_service = UserService(session)
 
-    async def _generate_token(self, user_id: int) -> str:
+    async def _generate_tokens(self, user_id: int) -> tuple[str, str]:
         """
-        Generate a JWT access token for the user and save it in the database.
+        Generate a JWT access token and a refresh token for the user, save both in the database,
+        and relate the refresh token to the access token.
         Args:
-            user_id (int): The ID of the user for whom to generate the token.
+            user_id (int): The ID of the user for whom to generate the tokens.
         Returns:
-            str: The generated JWT access token.
+            tuple[str, str]: The generated (access_token, refresh_token).
         """
-        token: str = await TokenUtils.generate_token(user_id=user_id)
-        access_token_obj = AccessToken(user_id=user_id, token=token)
+        access_token, access_expires_at = await TokenUtils.generate_access_token(user_id=user_id)
+        logging.debug(f"Generated access token for user {user_id}: {access_token}, ----- expires at: {access_expires_at}")
+        access_token_obj = AccessToken(
+            user_id=user_id, 
+            token=access_token, 
+            expires_at=access_expires_at
+        )
         self.session.add(access_token_obj)
+        await self.session.flush()
+
+        refresh_token, refresh_expires_at = await TokenUtils.generate_refresh_token(user_id=user_id)
+        refresh_token_obj = RefreshToken(
+            user_id=user_id,
+            access_token_id=access_token_obj.id,
+            token=refresh_token,
+            expires_at=refresh_expires_at
+        )
+        self.session.add(refresh_token_obj)
         await self.session.commit()
-        return token
+        return access_token, refresh_token
 
     async def signup(self, signup_data: AuthSignupRequest) -> AuthSignupResponse:
         """
@@ -54,16 +73,22 @@ class AuthService:
         if await self.user_service.user_exists_by_email(email=signup_data.email):
             raise_predefined_http_exception(DuplicateUserEmailException(signup_data.email))
         hashed_password: str = await HashUtils.hash_password(password=signup_data.password)
-        signup_data.password = hashed_password
-        new_user = User(**signup_data.dict())
-        self.session.add(new_user)
-        await self.session.commit()
-        await self.session.refresh(new_user)
-        token: str = await self._generate_token(user_id=new_user.id)
+        # Use UserService to create the user
+        new_user = await self.user_service.create_user(
+            full_name=signup_data.full_name,
+            email=signup_data.email,
+            password=hashed_password
+        )
+        # Extract needed fields before any further session operations
+        user_id = new_user.id
+        user_email = new_user.email
+        user_full_name = new_user.full_name
+        access_token, refresh_token = await self._generate_tokens(user_id=user_id)
         return AuthSignupResponse(
-            user=UserResponse(id=new_user.id, full_name=new_user.full_name, email=new_user.email),
-            access_token=token,
-            token_type="bearer"
+            user=UserResponse(id=user_id, full_name=user_full_name, email=user_email),
+            access_token=access_token,
+            token_type="bearer",
+            refresh_token=refresh_token
         )
 
     async def login(self, login_data: AuthLoginRequest) -> AuthLoginResponse:
@@ -80,9 +105,14 @@ class AuthService:
         user: User = await self.user_service.get_user_by_email(email=login_data.email)
         if user is None or not await HashUtils.check_password(password=login_data.password, hashed_password=user.password):
             raise_predefined_http_exception(InvalidCredentialsException())
-        token: str = await self._generate_token(user_id=user.id)
+        # Extract needed fields before any further session operations
+        user_id = user.id
+        user_email = user.email
+        user_full_name = user.full_name
+        access_token, refresh_token = await self._generate_tokens(user_id=user_id)
         return AuthLoginResponse(
-            user=UserResponse(id=user.id, full_name=user.full_name, email=user.email),
-            access_token=token,
-            token_type="bearer"
+            user=UserResponse(id=user_id, full_name=user_full_name, email=user_email),
+            access_token=access_token,
+            token_type="bearer",
+            refresh_token=refresh_token
         )

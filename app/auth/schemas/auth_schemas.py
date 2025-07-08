@@ -33,8 +33,10 @@ class AuthLoginResponse(BaseModel):
     user: UserResponse
     access_token: str
     token_type: str
+    refresh_token: str
 
 class AuthSignupResponse(BaseModel):
     user: UserResponse
     access_token: str
     token_type: str
+    refresh_token: str

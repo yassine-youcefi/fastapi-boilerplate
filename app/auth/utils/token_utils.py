@@ -1,26 +1,23 @@
 import jwt
 import time
+import secrets
+from typing import Tuple
+from datetime import datetime, timedelta, timezone
 from starlette.concurrency import run_in_threadpool
+
 from app.config.config import settings
 
+
 class TokenUtils:
-    @staticmethod
-    async def generate_token(user_id: int) -> str:
-        payload = {
-            "user_id": user_id,
-            "expires_in": int(time.time()) + settings.JWT_EXPIRES_IN
-        }
-        return await run_in_threadpool(
-            jwt.encode, payload, settings.JWT_SECRET, settings.JWT_ALGORITHM
-        )
 
     @staticmethod
     async def decode_token(token: str) -> dict:
         try:
             decoded_token = await run_in_threadpool(
-                jwt.decode, token, settings.JWT_SECRET, [settings.JWT_ALGORITHM]
+                jwt.decode, token, settings.JWT_SECRET, [
+                    settings.JWT_ALGORITHM]
             )
-            return decoded_token if decoded_token["expires_in"] >= time.time() else None
+            return decoded_token if decoded_token["expires_at"] >= time.time() else None
         except jwt.ExpiredSignatureError:
             print("Token expired")
         except jwt.InvalidTokenError:
@@ -28,3 +25,40 @@ class TokenUtils:
         except Exception as e:
             print(f"Error decoding token: {e}")
         return None
+
+    @staticmethod
+    async def generate_access_token(user_id: int) -> Tuple[str, datetime]:
+        """
+        Generate a JWT access token for the given user ID and return the token and its expiry as a datetime.
+        Args:
+            user_id (int): The user ID for whom the token is generated.
+        Returns:
+            Tuple[str, datetime]: The generated JWT access token and its expiry datetime.
+        """
+        expires_at_ts = int(time.time()) + settings.JWT_ACCESS_EXPIRES_IN
+        payload = {
+            "user_id": user_id,
+            "expires_at": expires_at_ts
+        }
+        token = await run_in_threadpool(
+            jwt.encode, payload, settings.JWT_SECRET, settings.JWT_ALGORITHM
+        )
+        # Use the configured server timezone (UTC+4)
+        expires_at = datetime.fromtimestamp(expires_at_ts, tz=settings.TZINFO)
+        return token, expires_at
+
+    @staticmethod
+    async def generate_refresh_token(user_id: int, expires_in: int = None) -> Tuple[str, datetime]:
+        """
+        Generate a secure random refresh token and its expiry datetime.
+        Args:
+            user_id (int): The user ID for whom the token is generated.
+            expires_in (int, optional): Expiry in seconds. Defaults to settings.JWT_REFRESH_EXPIRES_IN.
+        Returns:
+            Tuple[str, datetime]: The refresh token and its expiry datetime.
+        """
+        if expires_in is None:
+            expires_in = settings.JWT_REFRESH_EXPIRES_IN
+        token = secrets.token_urlsafe(64)
+        expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        return token, expires_at

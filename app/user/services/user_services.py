@@ -7,15 +7,40 @@ from typing import Optional
 
 
 class UserService:
+    """
+    Service class for user-related database operations.
+    Handles user lookup, creation, and validation logic.
+    """
     def __init__(self, session: AsyncSession) -> None:
+        """
+        Initialize UserService with a database session.
+        Args:
+            session (AsyncSession): SQLAlchemy async session for database operations.
+        """
         self.session = session
         
     async def user_exists_by_email(self, email: str) -> bool:
+        """
+        Check if a user exists by email.
+        Args:
+            email (str): The email address to check.
+        Returns:
+            bool: True if user exists, False otherwise.
+        """
         result = await self.session.execute(select(User).filter_by(email=email))
         user: Optional[User] = result.scalars().first()
         return user is not None
 
     async def get_user_by_email(self, email: str) -> User:
+        """
+        Retrieve a user by email.
+        Args:
+            email (str): The email address to search for.
+        Returns:
+            User: The user object if found.
+        Raises:
+            UserNotFoundException: If no user is found with the given email.
+        """
         result = await self.session.execute(select(User).filter_by(email=email))
         user: Optional[User] = result.scalars().first()
         if not user:
@@ -23,6 +48,15 @@ class UserService:
         return user
 
     async def get_user_by_id(self, user_id: int) -> User:
+        """
+        Retrieve a user by ID.
+        Args:
+            user_id (int): The user ID to search for.
+        Returns:
+            User: The user object if found.
+        Raises:
+            UserNotFoundException: If no user is found with the given ID.
+        """
         result = await self.session.execute(select(User).filter_by(id=user_id))
         user: Optional[User] = result.scalars().first()
         if not user:

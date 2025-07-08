@@ -2,7 +2,15 @@ from fastapi import status
 from app.exceptions import AppBaseException
 
 class DuplicateUserEmailException(AppBaseException):
+    """
+    Exception raised when attempting to register a user with an email that already exists.
+    """
     def __init__(self, email: str) -> None:
+        """
+        Initialize the exception with the duplicate email.
+        Args:
+            email (str): The duplicate email address.
+        """
         super().__init__(
             message=f"User with email {email} already exists",
             error_code="DUPLICATE_USER_EMAIL",
@@ -10,7 +18,13 @@ class DuplicateUserEmailException(AppBaseException):
         )
 
 class InvalidCredentialsException(AppBaseException):
+    """
+    Exception raised when user credentials are invalid during authentication.
+    """
     def __init__(self) -> None:
+        """
+        Initialize the exception for invalid credentials.
+        """
         super().__init__(
             message="Invalid email or password",
             error_code="INVALID_CREDENTIALS",

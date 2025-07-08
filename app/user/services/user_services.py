@@ -62,3 +62,19 @@ class UserService:
         if not user:
             raise_predefined_http_exception(UserNotFoundException(user_id=user_id))
         return user
+
+    async def create_user(self, full_name: str, email: str, password: str) -> User:
+        """
+        Create a new user in the database.
+        Args:
+            full_name (str): The user's full name.
+            email (str): The user's email address.
+            password (str): The user's hashed password.
+        Returns:
+            User: The created user object.
+        """
+        new_user = User(full_name=full_name, email=email, password=password)
+        self.session.add(new_user)
+        await self.session.commit()
+        await self.session.refresh(new_user)
+        return new_user

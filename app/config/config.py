@@ -1,3 +1,4 @@
+from datetime import timezone, timedelta
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
@@ -12,7 +13,8 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRES_IN: int = 36000
+    JWT_ACCESS_EXPIRES_IN: int = 36000
+    JWT_REFRESH_EXPIRES_IN: int = 604800  # 7 days default
     ECHO_SQL: bool = True
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 5
@@ -22,7 +24,8 @@ class Settings(BaseSettings):
     DB_PORT: str
     DB_NAME: str
     DB_TIMEOUT: int = 30
-    
+    SERVER_TIMEZONE: str = "UTC+4"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -37,5 +40,10 @@ class Settings(BaseSettings):
     def SYNC_DATABASE_URL(self) -> str:
         """Get the sync database URL (with psycopg2 driver)"""
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @property
+    def TZINFO(self):
+        """Return the tzinfo object for the configured server timezone (UTC+4)."""
+        return timezone(timedelta(hours=4))
 
 settings = Settings()

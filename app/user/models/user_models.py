@@ -1,7 +1,9 @@
 from app.config.database import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+from sqlalchemy.sql import func
+from app.config.config import settings
 
 class User(Base):
     """
@@ -14,6 +16,7 @@ class User(Base):
         role_id (int): Foreign key linking to the Role table.
         password (str): The user's hashed password.
         is_active (bool): Indicates if the user account is active.
+        created_at (datetime): The timestamp when the user was created.
         role (Role): Relationship to the Role model.
     """
     __tablename__ = "users"
@@ -25,9 +28,13 @@ class User(Base):
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationship with Role
     role = relationship("Role", back_populates="users", lazy="joined")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, full_name={self.full_name}, role={self.role.name if self.role else None})>"

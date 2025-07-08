@@ -44,7 +44,7 @@ class TokenUtils:
             jwt.encode, payload, settings.JWT_SECRET, settings.JWT_ALGORITHM
         )
         # Use the configured server timezone (UTC+4)
-        expires_at = datetime.fromtimestamp(expires_at_ts, tz=settings.TZINFO)
+        expires_at = datetime.fromtimestamp(expires_at_ts)
         return token, expires_at
 
     @staticmethod

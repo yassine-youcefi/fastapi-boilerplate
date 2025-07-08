@@ -41,9 +41,4 @@ class Settings(BaseSettings):
         """Get the sync database URL (with psycopg2 driver)"""
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    @property
-    def TZINFO(self):
-        """Return the tzinfo object for the configured server timezone (UTC+4)."""
-        return timezone(timedelta(hours=4))
-
 settings = Settings()

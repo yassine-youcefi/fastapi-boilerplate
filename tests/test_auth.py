@@ -1,3 +1,4 @@
+import os
 import pytest
 from httpx import AsyncClient
 from fastapi import status
@@ -5,7 +6,7 @@ from app.main import app
 
 @pytest.mark.asyncio
 async def test_signup_and_login():
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(app=app, base_url=os.getenv("BASE_URL", "http://localhost:8000")) as ac:
         # Signup
         signup_data = {
             "full_name": "Test User",

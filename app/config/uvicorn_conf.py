@@ -1,7 +1,3 @@
-# uvicorn_conf.py
-
-import logging
-
 # Logging configuration
 log_level = "debug"  # Verbose logging for easier debugging
 access_log = True  # Enable access logs for development debugging

@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi import APIRouter, Depends, status
 
 from app.auth.dependencies import get_auth_service

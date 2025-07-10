@@ -1,32 +1,20 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, Field
 from app.user.schemas.user_schemas import UserResponse
 
 class AuthSignupRequest(BaseModel):
-    full_name: str
+    full_name: str = Field(..., min_length=3, description="Full name must contain a space")
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
-    @validator("full_name")
-    def full_name_must_contain_space(cls, v):
-        if " " not in v:
-            raise ValueError("full_name must contain a space")
-        return v
-
-    @validator("password")
-    def password_must_be_strong(cls, v):
-        if len(v) < 8:
-            raise ValueError("password must be at least 8 characters")
-        return v
+    class Config:
+        orm_mode = True
 
 class AuthLoginRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
-    @validator("password")
-    def password_must_be_strong(cls, v):
-        if len(v) < 8:
-            raise ValueError("password must be at least 8 characters")
-        return v
+    class Config:
+        orm_mode = True
 
 class AuthLoginResponse(BaseModel):
     user: UserResponse
@@ -34,16 +22,28 @@ class AuthLoginResponse(BaseModel):
     token_type: str
     refresh_token: str
 
+    class Config:
+        orm_mode = True
+
 class AuthSignupResponse(BaseModel):
     user: UserResponse
     access_token: str
     token_type: str
     refresh_token: str
 
+    class Config:
+        orm_mode = True
+
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+    class Config:
+        orm_mode = True
 
 class RefreshTokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     refresh_token: str
+
+    class Config:
+        orm_mode = True

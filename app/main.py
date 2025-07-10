@@ -2,6 +2,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.config import Config
 
 from app.user.routes.user_routers import user_router
@@ -37,6 +38,25 @@ def get_redis_cache() -> RedisCache:
 def create_app() -> FastAPI:
     """App factory for FastAPI application."""
     app = FastAPI(**app_configs)
+    # CORS configuration
+    if ENVIRONMENT in SHOW_DOCS_ENVIRONMENT:
+        # Allow all origins in development/test
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    else:
+        # Restrict origins in production
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["https://your-production-domain.com"],
+            allow_credentials=True,
+            allow_methods=["GET", "POST", "PUT", "DELETE"],
+            allow_headers=["Authorization", "Content-Type"],
+        )
     # Exception handlers
     app.add_exception_handler(Exception, custom_http_exception_handler)
     app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
@@ -66,6 +86,9 @@ def create_app() -> FastAPI:
             return {"cached": True, "value": cached}
         await redis_cache.set("example_key", "hello from redis!", expire=60)
         return {"cached": False, "value": "hello from redis!"}
+
+    # TODO: For JWT security, use short-lived access tokens and rotate/harden refresh tokens.
+    # TODO: Store only hashed refresh tokens in the database for extra security.
 
     return app
 

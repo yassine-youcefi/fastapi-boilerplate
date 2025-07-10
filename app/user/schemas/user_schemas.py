@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 
 
@@ -7,22 +7,16 @@ class UserResponse(BaseModel):
     full_name: str
     email: EmailStr
 
+    class Config:
+        orm_mode = True
+
 
 class UserUpdate(BaseModel):
     id: int
-    full_name: Optional[str]
+    full_name: Optional[str] = Field(None, min_length=3, description="Full name must contain a space")
     email: Optional[EmailStr]
-    password: Optional[str]
+    password: Optional[str] = Field(None, min_length=8, description="Password must be at least 8 characters")
 
-    @validator("full_name")
-    def full_name_must_contain_space(cls, v):
-        if " " not in v:
-            raise ValueError("full_name must contain a space")
-        return v
-
-    @validator("password")
-    def password_must_be_strong(cls, v):
-        if len(v) < 8:
-            raise ValueError("password must be at least 8 characters")
-        return v
+    class Config:
+        orm_mode = True
 

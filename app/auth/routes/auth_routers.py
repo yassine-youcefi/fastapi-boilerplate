@@ -20,7 +20,7 @@ auth_router = APIRouter()
 async def login(
     login_data: AuthLoginRequest,
     auth_service: AuthService = Depends(get_auth_service)
-) -> Any:
+) -> AuthLoginResponse:
     return await auth_service.login(login_data=login_data)
 
 @auth_router.post(
@@ -33,7 +33,7 @@ async def login(
 async def signup(
     signup_data: AuthSignupRequest,
     auth_service: AuthService = Depends(get_auth_service)
-) -> Any:
+) -> AuthSignupResponse:
     return await auth_service.signup(signup_data=signup_data)
 
 @auth_router.post(
@@ -46,5 +46,5 @@ async def signup(
 async def refresh_token(
     refresh_data: RefreshTokenRequest,
     auth_service: AuthService = Depends(get_auth_service)
-) -> Any:
+) -> RefreshTokenResponse:
     return await auth_service.refresh_token(refresh_data=refresh_data)

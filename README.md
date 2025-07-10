@@ -184,11 +184,16 @@ Content-Type: application/json
 - Write tests for new features in the `tests/` directory.
 - Use descriptive commit messages.
 - Open issues or pull requests for improvements.
-- **Before pushing, you MUST run:**
-  ```sh
-  pre-commit run --all-files
-  ```
-  and ensure all checks pass. This is required for all contributors.
+- <b style="color:red">Before pushing, you MUST run:</b>
+  <pre style="color:red"><code>pre-commit run --all-files
+pytest --cov=app tests/
+</code></pre>
+  <b style="color:red">and ensure all checks pass. This is required for all contributors.</b>
+
+For detailed output and troubleshooting, you can use:
+<pre><code>pre-commit run --all-files --verbose --show-diff-on-failure
+</code></pre>
+This will show exactly what changes each hook would make and help you fix issues before pushing.
 
 ---
 

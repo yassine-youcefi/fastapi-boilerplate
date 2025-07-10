@@ -13,9 +13,13 @@ class UserResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     id: int
-    full_name: Optional[str] = Field(None, min_length=3, description="Full name must contain a space")
+    full_name: Optional[str] = Field(
+        None, min_length=3, description="Full name must contain a space"
+    )
     email: Optional[EmailStr]
-    password: Optional[str] = Field(None, min_length=8, description="Password must be at least 8 characters")
+    password: Optional[str] = Field(
+        None, min_length=8, description="Password must be at least 8 characters"
+    )
 
     class Config:
         orm_mode = True

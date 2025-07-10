@@ -87,7 +87,8 @@ def create_app() -> FastAPI:
         await redis_cache.set("example_key", "hello from redis!", expire=60)
         return {"cached": False, "value": "hello from redis!"}
 
-    # TODO: For JWT security, use short-lived access tokens and rotate/harden refresh tokens.
+    # TODO: For JWT security, use short-lived access tokens and rotate/harden
+    # refresh tokens.
     # TODO: Store only hashed refresh tokens in the database for extra security.
 
     return app

@@ -15,7 +15,8 @@ class UserService:
         """
         Initialize UserService with a database session.
         Args:
-            session (AsyncSession): SQLAlchemy async session for database operations.
+            session (AsyncSession): SQLAlchemy async session for database
+                operations.
         """
         self.session = session
         
@@ -27,7 +28,9 @@ class UserService:
         Returns:
             bool: True if user exists, False otherwise.
         """
-        result = await self.session.execute(select(User).filter_by(email=email))
+        result = await self.session.execute(
+            select(User).filter_by(email=email)
+        )
         user: Optional[User] = result.scalars().first()
         return user is not None
 
@@ -41,7 +44,9 @@ class UserService:
         Raises:
             UserNotFoundException: If no user is found with the given email.
         """
-        result = await self.session.execute(select(User).filter_by(email=email))
+        result = await self.session.execute(
+            select(User).filter_by(email=email)
+        )
         user: Optional[User] = result.scalars().first()
         if not user:
             raise_predefined_http_exception(UserNotFoundException(user_id=email))
@@ -57,7 +62,9 @@ class UserService:
         Raises:
             UserNotFoundException: If no user is found with the given ID.
         """
-        result = await self.session.execute(select(User).filter_by(id=user_id))
+        result = await self.session.execute(
+            select(User).filter_by(id=user_id)
+        )
         user: Optional[User] = result.scalars().first()
         if not user:
             raise_predefined_http_exception(UserNotFoundException(user_id=user_id))

@@ -24,7 +24,9 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True)
+    role_id = Column(
+        Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True
+    )
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
@@ -36,7 +38,10 @@ class User(Base):
         super().__init__(*args, **kwargs)
 
     def __repr__(self):
-        return f"<User(id={self.id}, email={self.email}, full_name={self.full_name}, role={self.role.name if self.role else None})>"
+        return (
+            f"<User(id={self.id}, email={self.email}, full_name={self.full_name}, "
+            f"role={self.role.name if self.role else None})>"
+        )
 
 
 class Role(Base):
@@ -60,4 +65,6 @@ class Role(Base):
     users = relationship("User", back_populates="role", lazy="select")
 
     def __repr__(self):
-        return f"<Role(id={self.id}, name={self.name}, permissions={self.permissions})>"
+        return (
+            f"<Role(id={self.id}, name={self.name}, permissions={self.permissions})>"
+        )

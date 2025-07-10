@@ -4,6 +4,7 @@ from starlette.concurrency import run_in_threadpool
 
 ph = PasswordHasher()
 
+
 class HashUtils:
     @staticmethod
     async def check_password(password: str, hashed_password: str) -> bool:

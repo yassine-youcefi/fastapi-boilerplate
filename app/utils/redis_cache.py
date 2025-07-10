@@ -1,5 +1,7 @@
-import redis.asyncio as redis
 from typing import Any
+
+import redis.asyncio as redis
+
 
 class RedisCache:
     def __init__(self, url: str):

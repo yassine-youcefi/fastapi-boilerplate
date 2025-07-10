@@ -1,12 +1,15 @@
-from datetime import timezone, timedelta
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from datetime import timedelta, timezone
 from typing import Optional
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     """
     Application configuration using Pydantic BaseSettings.
     Loads variables from environment and .env file.
     """
+
     PROJECT_NAME: str = "FastQR-Dine Backend"
     APP_ENV: str = "development"
     ENVIRONMENT: str = "dev"  # Add this line to match .env
@@ -54,5 +57,6 @@ class Settings(BaseSettings):
         if self.REDIS_URL:
             return self.REDIS_URL
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+
 
 settings = Settings()

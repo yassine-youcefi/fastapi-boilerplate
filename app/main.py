@@ -1,28 +1,31 @@
 import logging
+
 from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
-from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
+from fastapi.exceptions import \
+    RequestValidationError as FastAPIRequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.config import Config
 
-from app.user.routes.user_routers import user_router
 from app.auth.routes.auth_routers import auth_router
-from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
-from app.utils.redis_cache import RedisCache
 from app.config.config import settings
+from app.exceptions import (custom_http_exception_handler,
+                            custom_validation_exception_handler)
+from app.user.routes.user_routers import user_router
+from app.utils.redis_cache import RedisCache
 
 logging.basicConfig(level=logging.DEBUG)
 
 # Load environment configuration
 config = Config(".env")
 ENVIRONMENT = config("ENVIRONMENT", cast=str, default="dev")
-SHOW_DOCS_ENVIRONMENT = ("dev", "test") 
+SHOW_DOCS_ENVIRONMENT = ("dev", "test")
 
 app_configs = {
     "title": "Fastapi Boilerplate",
     "description": "API for managing digital restaurant orders.",
     "version": "0.0.1",
-    "debug": True
+    "debug": True,
 }
 if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["openapi_url"] = None
@@ -30,6 +33,7 @@ if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["redoc_url"] = None
 
 redis_cache = RedisCache(url=settings.REDIS_URI)
+
 
 def get_redis_cache() -> RedisCache:
     return redis_cache
@@ -59,8 +63,12 @@ def create_app() -> FastAPI:
         )
     # Exception handlers
     app.add_exception_handler(Exception, custom_http_exception_handler)
-    app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
-    app.add_exception_handler(FastAPIRequestValidationError, custom_validation_exception_handler)
+    app.add_exception_handler(
+        RequestValidationError, custom_validation_exception_handler
+    )
+    app.add_exception_handler(
+        FastAPIRequestValidationError, custom_validation_exception_handler
+    )
 
     # Include routers
     app.include_router(user_router, prefix="/user", tags=["User"])

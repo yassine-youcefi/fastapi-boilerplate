@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserResponse(BaseModel):
@@ -23,4 +24,3 @@ class UserUpdate(BaseModel):
 
     class Config:
         orm_mode = True
-

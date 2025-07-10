@@ -1,5 +1,6 @@
-from app.utils.redis_cache import RedisCache
 from app.config.config import settings
+from app.utils.redis_cache import RedisCache
+
 
 def get_redis_cache() -> RedisCache:
     """Dependency that provides the RedisCache instance."""

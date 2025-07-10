@@ -1,9 +1,11 @@
+from typing import Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.user.models.user_models import User
+
 from app.exceptions import raise_predefined_http_exception
 from app.user.exceptions import UserNotFoundException
-from typing import Optional
+from app.user.models.user_models import User
 
 
 class UserService:
@@ -11,6 +13,7 @@ class UserService:
     Service class for user-related database operations.
     Handles user lookup, creation, and validation logic.
     """
+
     def __init__(self, session: AsyncSession) -> None:
         """
         Initialize UserService with a database session.
@@ -19,7 +22,7 @@ class UserService:
                 operations.
         """
         self.session = session
-        
+
     async def user_exists_by_email(self, email: str) -> bool:
         """
         Check if a user exists by email.
@@ -28,9 +31,7 @@ class UserService:
         Returns:
             bool: True if user exists, False otherwise.
         """
-        result = await self.session.execute(
-            select(User).filter_by(email=email)
-        )
+        result = await self.session.execute(select(User).filter_by(email=email))
         user: Optional[User] = result.scalars().first()
         return user is not None
 
@@ -44,9 +45,7 @@ class UserService:
         Raises:
             UserNotFoundException: If no user is found with the given email.
         """
-        result = await self.session.execute(
-            select(User).filter_by(email=email)
-        )
+        result = await self.session.execute(select(User).filter_by(email=email))
         user: Optional[User] = result.scalars().first()
         if not user:
             raise_predefined_http_exception(UserNotFoundException(user_id=email))
@@ -62,9 +61,7 @@ class UserService:
         Raises:
             UserNotFoundException: If no user is found with the given ID.
         """
-        result = await self.session.execute(
-            select(User).filter_by(id=user_id)
-        )
+        result = await self.session.execute(select(User).filter_by(id=user_id))
         user: Optional[User] = result.scalars().first()
         if not user:
             raise_predefined_http_exception(UserNotFoundException(user_id=user_id))

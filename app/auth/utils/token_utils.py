@@ -1,11 +1,13 @@
-import jwt
-import time
 import secrets
-from typing import Tuple
+import time
 from datetime import datetime, timedelta, timezone
-from starlette.concurrency import run_in_threadpool
-from app.config.config import settings
+from typing import Tuple
+
+import jwt
 import pytz
+from starlette.concurrency import run_in_threadpool
+
+from app.config.config import settings
 
 
 class TokenUtils:
@@ -14,8 +16,7 @@ class TokenUtils:
     async def decode_token(token: str) -> dict:
         try:
             decoded_token = await run_in_threadpool(
-                jwt.decode, token, settings.JWT_SECRET, [
-                    settings.JWT_ALGORITHM]
+                jwt.decode, token, settings.JWT_SECRET, [settings.JWT_ALGORITHM]
             )
             return decoded_token if decoded_token["expires_at"] >= time.time() else None
         except jwt.ExpiredSignatureError:
@@ -36,21 +37,22 @@ class TokenUtils:
             Tuple[str, datetime]: The generated JWT access token and its expiry datetime.
         """
         expires_at_ts = int(time.time()) + settings.JWT_ACCESS_EXPIRES_IN
-        payload = {
-            "user_id": user_id,
-            "expires_at": expires_at_ts
-        }
+        payload = {"user_id": user_id, "expires_at": expires_at_ts}
         token = await run_in_threadpool(
             jwt.encode, payload, settings.JWT_SECRET, settings.JWT_ALGORITHM
         )
 
-        expires_at = datetime.fromtimestamp(expires_at_ts, tz=pytz.timezone('Asia/Dubai'))
+        expires_at = datetime.fromtimestamp(
+            expires_at_ts, tz=pytz.timezone("Asia/Dubai")
+        )
         # Convert to UTC before saving to DB
         expires_at_utc = expires_at.astimezone(timezone.utc)
         return token, expires_at_utc
 
     @staticmethod
-    async def generate_refresh_token(user_id: int, expires_in: int = None) -> Tuple[str, datetime]:
+    async def generate_refresh_token(
+        user_id: int, expires_in: int = None
+    ) -> Tuple[str, datetime]:
         """
         Generate a secure random refresh token and its expiry datetime.
         Args:
@@ -62,7 +64,9 @@ class TokenUtils:
         if expires_in is None:
             expires_in = settings.JWT_REFRESH_EXPIRES_IN
         token = secrets.token_urlsafe(64)
-        expires_at = datetime.now(pytz.timezone('Asia/Dubai')) + timedelta(seconds=expires_in)
+        expires_at = datetime.now(pytz.timezone("Asia/Dubai")) + timedelta(
+            seconds=expires_in
+        )
         # Convert to UTC before saving to DB
         expires_at_utc = expires_at.astimezone(timezone.utc)
         return token, expires_at_utc

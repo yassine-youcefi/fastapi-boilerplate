@@ -184,6 +184,11 @@ Content-Type: application/json
 - Write tests for new features in the `tests/` directory.
 - Use descriptive commit messages.
 - Open issues or pull requests for improvements.
+- **Before pushing, you MUST run:**
+  ```sh
+  pre-commit run --all-files
+  ```
+  and ensure all checks pass. This is required for all contributors.
 
 ---
 

@@ -1,7 +1,6 @@
 # FastAPI Boilerplate
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/your-repo)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A robust, production-ready FastAPI backend template following best practices for structure, configuration, and development workflow.
 
@@ -203,3 +202,27 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 **Happy coding!**
+
+---
+
+## 🚦 CI/CD & Test Coverage
+
+- **Automated CI:** Every push and pull request triggers a GitHub Actions workflow that:
+  - Installs dependencies
+  - Runs pre-commit hooks (`black`, `isort`, `flake8`)
+  - Runs all tests with coverage reporting (`pytest --cov=app tests/`)
+  - Uploads a coverage report as an artifact
+
+- **Pre-commit Hooks:** Code style and linting are enforced automatically on every commit and in CI. To enable locally:
+  ```sh
+  pre-commit install
+  ```
+
+- **Test Coverage:**
+  - To run tests with coverage locally:
+    ```sh
+    pytest --cov=app tests/
+    ```
+  - The CI workflow will fail if tests or code style checks do not pass.
+
+---

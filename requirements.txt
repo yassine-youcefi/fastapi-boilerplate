@@ -27,6 +27,7 @@ redis==5.0.4
 # Testing
 pytest-asyncio==0.24.0
 faker==33.1.0
+pytest-cov==5.0.0
 
 # Logging
 loguru==0.7.3

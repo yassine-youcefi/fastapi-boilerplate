@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, status
 
 from app.auth.dependencies import get_auth_service
-from app.auth.schemas.auth_schemas import (AuthLoginRequest, AuthLoginResponse,
-                                           AuthSignupRequest,
-                                           AuthSignupResponse,
-                                           RefreshTokenRequest,
-                                           RefreshTokenResponse)
+from app.auth.schemas.auth_schemas import (
+    AuthLoginRequest,
+    AuthLoginResponse,
+    AuthSignupRequest,
+    AuthSignupResponse,
+    RefreshTokenRequest,
+    RefreshTokenResponse,
+)
 from app.auth.services.auth_services import AuthService
 
 auth_router = APIRouter()
@@ -19,7 +22,8 @@ auth_router = APIRouter()
     summary="User Login",
 )
 async def login(
-    login_data: AuthLoginRequest, auth_service: AuthService = Depends(get_auth_service)
+    login_data: AuthLoginRequest,
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> AuthLoginResponse:
     return await auth_service.login(login_data=login_data)
 

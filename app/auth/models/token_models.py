@@ -14,7 +14,10 @@ class AccessToken(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     token = Column(String, nullable=False, unique=True, index=True)
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
@@ -26,9 +29,7 @@ class AccessToken(Base):
     def __init__(self, *args, **kwargs):
         expires_at = kwargs.get("expires_at")
         if expires_at is None:
-            raise ValueError(
-                "expires_at must be provided for AccessToken and cannot be None."
-            )
+            raise ValueError("expires_at must be provided for AccessToken and cannot be None.")
         super().__init__(*args, **kwargs)
 
 
@@ -41,7 +42,10 @@ class RefreshToken(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     access_token_id = Column(
         Integer,
@@ -59,7 +63,5 @@ class RefreshToken(Base):
     def __init__(self, *args, **kwargs):
         expires_at = kwargs.get("expires_at")
         if expires_at is None:
-            raise ValueError(
-                "expires_at must be provided for RefreshToken and cannot be None."
-            )
+            raise ValueError("expires_at must be provided for RefreshToken and cannot be None.")
         super().__init__(*args, **kwargs)

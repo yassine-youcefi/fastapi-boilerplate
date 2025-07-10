@@ -1,8 +1,7 @@
 from typing import Optional
 
 from fastapi import HTTPException, Request
-from fastapi.exceptions import \
-    RequestValidationError as FastAPIRequestValidationError
+from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 from fastapi.responses import JSONResponse
 
 
@@ -39,9 +38,7 @@ class AppBaseException(Exception):
 
 
 # Utility to raise HTTPException with your schema
-def raise_http_exception(
-    status_code: int, message: str, error_code: Optional[str] = None
-) -> None:
+def raise_http_exception(status_code: int, message: str, error_code: Optional[str] = None) -> None:
     """
     Raise a FastAPI HTTPException with a standardized error schema.
     Args:
@@ -50,7 +47,8 @@ def raise_http_exception(
         error_code (Optional[str]): Application-specific error code.
     """
     raise HTTPException(
-        status_code=status_code, detail=[{"error_code": error_code, "message": message}]
+        status_code=status_code,
+        detail=[{"error_code": error_code, "message": message}],
     )
 
 
@@ -68,9 +66,7 @@ def raise_predefined_http_exception(exc: Exception) -> None:
 
 
 # Centralized custom exception handler
-async def custom_http_exception_handler(
-    request: Request, exc: Exception
-) -> JSONResponse:
+async def custom_http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """
     Handle all exceptions and return a standardized error response.
     Args:
@@ -82,23 +78,17 @@ async def custom_http_exception_handler(
     # Handle FastAPI/Starlette HTTPException
     if isinstance(exc, HTTPException):
         detail = exc.detail
-        if isinstance(detail, list) and all(
-            isinstance(item, dict) and "message" in item for item in detail
-        ):
+        if isinstance(detail, list) and all(isinstance(item, dict) and "message" in item for item in detail):
             return JSONResponse(status_code=exc.status_code, content={"errors": detail})
         return JSONResponse(
             status_code=exc.status_code,
-            content={
-                "errors": [{"error_code": "HTTP_EXCEPTION", "message": str(detail)}]
-            },
+            content={"errors": [{"error_code": "HTTP_EXCEPTION", "message": str(detail)}]},
         )
     # Handle custom app exceptions
     if isinstance(exc, AppBaseException):
         return JSONResponse(
             status_code=exc.status_code,
-            content={
-                "errors": [{"error_code": exc.error_code, "message": exc.message}]
-            },
+            content={"errors": [{"error_code": exc.error_code, "message": exc.message}]},
         )
     # Fallback for unhandled exceptions
     return JSONResponse(
@@ -115,9 +105,7 @@ async def custom_http_exception_handler(
 
 
 # Custom exception handler for validation errors
-async def custom_validation_exception_handler(
-    request: Request, exc: FastAPIRequestValidationError
-) -> JSONResponse:
+async def custom_validation_exception_handler(request: Request, exc: FastAPIRequestValidationError) -> JSONResponse:
     """
     Handle validation errors and return a standardized error response.
     Args:
@@ -126,8 +114,5 @@ async def custom_validation_exception_handler(
     Returns:
         JSONResponse: The standardized error response for validation errors.
     """
-    errors = [
-        {"error_code": "VALIDATION_ERROR", "message": err["msg"]}
-        for err in exc.errors()
-    ]
+    errors = [{"error_code": "VALIDATION_ERROR", "message": err["msg"]} for err in exc.errors()]
     return JSONResponse(status_code=422, content={"errors": errors})

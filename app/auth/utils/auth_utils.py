@@ -17,16 +17,12 @@ async def get_request_user(
     authorization: Annotated[Union[str, None], Header()] = None,
 ) -> UserResponse:
 
-    auth_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-    )
+    auth_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     if not authorization or not authorization.startswith(AUTH_PREFIX):
         raise auth_exception
 
-    payload = await TokenUtils.decode_token(
-        token=authorization.replace(AUTH_PREFIX, "").strip()
-    )
+    payload = await TokenUtils.decode_token(token=authorization.replace(AUTH_PREFIX, "").strip())
 
     if payload and "user_id" in payload:
         auth_service = AuthService(session=session)

@@ -2,15 +2,13 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
-from fastapi.exceptions import \
-    RequestValidationError as FastAPIRequestValidationError
+from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.config import Config
 
 from app.auth.routes.auth_routers import auth_router
 from app.config.config import settings
-from app.exceptions import (custom_http_exception_handler,
-                            custom_validation_exception_handler)
+from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
 from app.user.routes.user_routers import user_router
 from app.utils.redis_cache import RedisCache
 
@@ -63,12 +61,8 @@ def create_app() -> FastAPI:
         )
     # Exception handlers
     app.add_exception_handler(Exception, custom_http_exception_handler)
-    app.add_exception_handler(
-        RequestValidationError, custom_validation_exception_handler
-    )
-    app.add_exception_handler(
-        FastAPIRequestValidationError, custom_validation_exception_handler
-    )
+    app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
+    app.add_exception_handler(FastAPIRequestValidationError, custom_validation_exception_handler)
 
     # Include routers
     app.include_router(user_router, prefix="/user", tags=["User"])

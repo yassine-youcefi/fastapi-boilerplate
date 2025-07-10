@@ -4,13 +4,9 @@ from app.user.schemas.user_schemas import UserResponse
 
 
 class AuthSignupRequest(BaseModel):
-    full_name: str = Field(
-        ..., min_length=3, description="Full name must contain a space"
-    )
+    full_name: str = Field(..., min_length=3, description="Full name must contain a space")
     email: EmailStr
-    password: str = Field(
-        ..., min_length=8, description="Password must be at least 8 characters"
-    )
+    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
     class Config:
         orm_mode = True
@@ -18,9 +14,7 @@ class AuthSignupRequest(BaseModel):
 
 class AuthLoginRequest(BaseModel):
     email: EmailStr
-    password: str = Field(
-        ..., min_length=8, description="Password must be at least 8 characters"
-    )
+    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
     class Config:
         orm_mode = True

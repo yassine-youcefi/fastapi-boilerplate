@@ -8,9 +8,7 @@ from app.config.config import settings
 engine = create_async_engine(settings.ASYNC_DATABASE_URL)
 
 # Create async session factory
-AsyncSessionLocal = sessionmaker(
-    bind=engine, class_=AsyncSession, autocommit=False, autoflush=False
-)
+AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, autocommit=False, autoflush=False)
 
 # Create base class for models
 Base = declarative_base()

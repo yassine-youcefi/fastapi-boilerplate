@@ -7,7 +7,7 @@ from app.auth.schemas.auth_schemas import (
     AuthLoginRequest, AuthLoginResponse, AuthSignupRequest, AuthSignupResponse,
     RefreshTokenRequest, RefreshTokenResponse
 )
-from app.user.schemas import UserResponse
+from app.user.schemas.user_schemas import UserResponse
 from app.user.services.user_services import UserService
 from app.exceptions import raise_predefined_http_exception
 from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException, InvalidTokenException

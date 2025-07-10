@@ -1,5 +1,4 @@
 import redis.asyncio as redis
-from fastapi import Request
 from typing import Any
 
 class RedisCache:

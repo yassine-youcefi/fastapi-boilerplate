@@ -1,6 +1,5 @@
-from typing import Optional
-
-from fastapi import Depends, Header
+from fastapi import Depends, Security
+from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.exceptions import AuthenticationRequiredException, InvalidTokenException
@@ -11,12 +10,15 @@ from app.exceptions import raise_predefined_http_exception
 from app.user.models.user_models import User
 from app.user.services.user_services import UserService
 
+# Use APIKeyHeader to make Authorization required and properly described in OpenAPI
+authorization_scheme = APIKeyHeader(name="Authorization", auto_error=False, description="Bearer access token")
+
 
 def get_auth_service(session: AsyncSession = Depends(get_db)) -> AuthService:
     return AuthService(session=session)
 
 
-def get_authorization_token(authorization: Optional[str] = Header(None)) -> str:
+def get_authorization_token(authorization: str = Security(authorization_scheme)) -> str:
     if not authorization or not authorization.startswith("Bearer "):
         raise_predefined_http_exception(AuthenticationRequiredException())
     return authorization.split(" ", 1)[1]

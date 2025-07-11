@@ -1,4 +1,5 @@
 import logging
+from typing import Annotated
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,7 +29,7 @@ class AuthService:
     Handles user registration, password hashing, and JWT token generation.
     """
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: Annotated[AsyncSession, "Auth DB session"]) -> None:
         """
         Initialize AuthService with a database session.
         Args:

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +15,7 @@ class UserService:
     Handles user lookup, creation, and validation logic.
     """
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: Annotated[AsyncSession, "User DB session"]) -> None:
         """
         Initialize UserService with a database session.
         Args:

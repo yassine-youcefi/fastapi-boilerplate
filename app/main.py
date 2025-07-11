@@ -26,9 +26,21 @@ SHOW_DOCS_ENVIRONMENT = ("dev", "test")
 
 app_configs = {
     "title": "Fastapi Boilerplate",
-    "description": "API for managing digital restaurant orders.",
+    "description": "A boilerplate for FastAPI applications with user authentication and Redis caching.",
     "version": "0.0.1",
-    "debug": True,
+    "debug": ENVIRONMENT in SHOW_DOCS_ENVIRONMENT,
+    "openapi_tags": [
+        {
+            "name": "User",
+            "description": "APIs related to user and account management.",
+        },
+        {
+            "name": "Auth",
+            "description": "APIs related to user authentication and token management.",
+        },
+    ],
+    "docs_url": "/docs" if ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
+    "redoc_url": "/redoc" if ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
 }
 if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["openapi_url"] = None

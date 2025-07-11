@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
 
 from app.auth.dependencies import get_current_user
@@ -15,7 +17,7 @@ user_router = APIRouter()
     description="Get details of the current user from the access token.",
     summary="Get Current User Details",
 )
-async def get_user_details(current_user: UserResponse = Depends(get_current_user)) -> UserResponse:
+async def get_user_details(current_user: Annotated[UserResponse, Depends(get_current_user)]) -> UserResponse:
     return current_user
 
 
@@ -28,8 +30,8 @@ async def get_user_details(current_user: UserResponse = Depends(get_current_user
 )
 async def update_user(
     user_update: UserUpdate,
-    current_user=Depends(get_current_user),
-    user_service: UserService = Depends(get_user_service),
+    current_user: Annotated[UserResponse, Depends(get_current_user)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserResponse:
     updated_user = await user_service.update_user(user_update, current_user)
     return UserResponse.model_validate(updated_user)

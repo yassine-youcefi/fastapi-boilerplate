@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
 
 from app.auth.dependencies import get_auth_service
@@ -23,7 +25,7 @@ auth_router = APIRouter()
 )
 async def login(
     login_data: AuthLoginRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> AuthLoginResponse:
     return await auth_service.login(login_data=login_data)
 
@@ -37,7 +39,7 @@ async def login(
 )
 async def signup(
     signup_data: AuthSignupRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> AuthSignupResponse:
     return await auth_service.signup(signup_data=signup_data)
 
@@ -51,6 +53,6 @@ async def signup(
 )
 async def refresh_token(
     refresh_data: RefreshTokenRequest,
-    auth_service: AuthService = Depends(get_auth_service),
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> RefreshTokenResponse:
     return await auth_service.refresh_token(refresh_data=refresh_data)

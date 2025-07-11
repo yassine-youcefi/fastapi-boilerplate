@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, status
 
 from app.auth.dependencies import get_current_user
-from app.user.schemas.user_schemas import UserResponse
+from app.user.dependencies import get_user_service
+from app.user.schemas.user_schemas import UserResponse, UserUpdate
+from app.user.services.user_services import UserService
 
 user_router = APIRouter()
 
@@ -15,3 +17,19 @@ user_router = APIRouter()
 )
 async def get_user_details(current_user: UserResponse = Depends(get_current_user)) -> UserResponse:
     return current_user
+
+
+@user_router.put(
+    "/update",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    description="Update the current user's information.",
+    summary="Update Current User",
+)
+async def update_user(
+    user_update: UserUpdate,
+    current_user=Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),
+) -> UserResponse:
+    updated_user = await user_service.update_user(user_update, current_user)
+    return UserResponse.model_validate(updated_user)

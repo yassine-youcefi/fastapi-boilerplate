@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.exceptions import raise_predefined_http_exception
 from app.user.exceptions import UserNotFoundException
 from app.user.models.user_models import User
+from app.user.schemas.user_schemas import UserUpdate
 
 
 class UserService:
@@ -82,3 +83,25 @@ class UserService:
         await self.session.commit()
         await self.session.refresh(new_user)
         return new_user
+
+    async def update_user(self, user_update: UserUpdate, current_user: User) -> User:
+        """
+        Update an existing user in the database.
+        Args:
+            user_update (UserUpdate): The user update data (should not contain id or password).
+            current_user (User): The current user object.
+        Returns:
+            User: The updated user object.
+        """
+        update_data = user_update.dict(exclude_unset=True)
+        # Check for email uniqueness if email is being updated
+        if "email" in update_data and update_data["email"] != current_user.email:
+            if await self.user_exists_by_email(update_data["email"]):
+                from app.auth.exceptions import DuplicateUserEmailException
+
+                raise_predefined_http_exception(DuplicateUserEmailException(update_data["email"]))
+        for field, value in update_data.items():
+            setattr(current_user, field, value)
+        await self.session.commit()
+        await self.session.refresh(current_user)
+        return current_user

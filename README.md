@@ -157,7 +157,7 @@ pre-commit install
 
 ### Register
 ```http
-POST /api/v1/auth/register
+POST /user/auth/signup
 Content-Type: application/json
 
 {
@@ -168,7 +168,7 @@ Content-Type: application/json
 
 ### Login
 ```http
-POST /api/v1/auth/login
+POST /user/auth/login
 Content-Type: application/json
 
 {

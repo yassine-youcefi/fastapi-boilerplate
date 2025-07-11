@@ -51,3 +51,19 @@ class InvalidTokenException(AppBaseException):
             error_code="INVALID_TOKEN",
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
+
+
+class AuthenticationRequiredException(AppBaseException):
+    """
+    Exception raised when authentication is required but not provided.
+    """
+
+    def __init__(self) -> None:
+        """
+        Initialize the exception for missing authentication.
+        """
+        super().__init__(
+            message="Authentication is required",
+            error_code="AUTHENTICATION_REQUIRED",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )

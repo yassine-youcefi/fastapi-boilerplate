@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,14 +7,16 @@ class Settings(BaseSettings):
     Loads variables from environment and .env file.
     """
 
-    PROJECT_NAME: str = "FastQR-Dine Backend"
-    APP_ENV: str = "development"
-    ENVIRONMENT: str = "dev"  # Add this line to match .env
+    PROJECT_NAME: str = "fastapi-boilerplate"
     DEBUG: bool = True
+    ENVIRONMENT: str = "dev"  # Add this line to match .env
+    BASE_URL: str = "http://localhost:8000"
+
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_EXPIRES_IN: int = 36000
-    JWT_REFRESH_EXPIRES_IN: int = 604800  # 7 days default
+    JWT_REFRESH_EXPIRES_IN: int = 604800
+
     ECHO_SQL: bool = True
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 5
@@ -32,7 +32,11 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "redis"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
-    REDIS_URL: Optional[str] = None
+    REDIS_URL: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"  # Default Redis URL format
+
+    # Celery configuration
+    CELERY_BROKER_URL: str = REDIS_URL
+    CELERY_RESULT_BACKEND: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB + 1}"
 
     model_config = SettingsConfigDict(
         env_file=".env",

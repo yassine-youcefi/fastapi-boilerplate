@@ -4,7 +4,7 @@ from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.services.auth_services import AuthService
-from app.config.database import get_db
+from app.dependencies import get_db
 from app.user.schemas import UserResponse
 
 from .token_utils import TokenUtils

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.exceptions import AuthenticationRequiredException, InvalidTokenException
 from app.auth.services.auth_services import AuthService
 from app.auth.utils.token_utils import TokenUtils
-from app.config.database import get_db
+from app.dependencies import get_db
 from app.exceptions import raise_predefined_http_exception
 from app.user.models.user_models import User
 from app.user.services.user_services import UserService

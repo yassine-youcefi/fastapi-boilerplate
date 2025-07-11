@@ -7,10 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.config import Config
 
 from app.auth.routes.auth_routers import auth_router
-from app.config.config import settings
+from app.dependencies import get_redis_cache
 from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
 from app.user.routes.user_routers import user_router
-from app.utils.redis_cache import RedisCache
 
 # =========================
 # Logging Configuration
@@ -46,15 +45,6 @@ if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["openapi_url"] = None
     app_configs["docs_url"] = None
     app_configs["redoc_url"] = None
-
-# =========================
-# Redis Cache
-# =========================
-redis_cache = RedisCache(url=settings.REDIS_URI)
-
-
-def get_redis_cache() -> RedisCache:
-    return redis_cache
 
 
 # =========================
@@ -94,20 +84,15 @@ def create_app() -> FastAPI:
     # Startup/Shutdown events
     @app.on_event("startup")
     async def startup_event():
-        await redis_cache.connect()
+        try:
+            await get_redis_cache()
+        except Exception as e:
+            logging.error(f"Redis connection failed at startup: {e}")
 
     @app.on_event("shutdown")
     async def shutdown_event():
-        await redis_cache.close()
-
-    # Example cache endpoint (can be removed in production)
-    @app.get("/cache-example")
-    async def cache_example():
-        cached = await redis_cache.get("example_key")
-        if cached:
-            return {"cached": True, "value": cached}
-        await redis_cache.set("example_key", "hello from redis!", expire=60)
-        return {"cached": False, "value": "hello from redis!"}
+        if hasattr(get_redis_cache, "_instance"):
+            await get_redis_cache._instance.close()
 
     return app
 

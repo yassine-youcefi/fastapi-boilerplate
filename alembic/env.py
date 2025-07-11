@@ -22,7 +22,7 @@ config.set_main_option(
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from app.config.database import Base
+from app.integrations.database import Base
 from app.user.models.user_models import User
 from app.auth.models.token_models import AccessToken, RefreshToken
 

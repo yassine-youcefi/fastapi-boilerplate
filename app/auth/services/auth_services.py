@@ -49,9 +49,6 @@ class AuthService:
             tuple[str, str]: The generated (access_token, refresh_token).
         """
         access_token, access_expires_at = await TokenUtils.generate_access_token(user_id=user_id)
-        logging.debug(
-            f"Generated access token for user {user_id}: {access_token}, ----- expires at: {access_expires_at}"
-        )
         access_token_obj = AccessToken(
             user_id=user_id,
             token=access_token,

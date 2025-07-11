@@ -1,6 +1,7 @@
 import logging
 from typing import Annotated
 
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.exceptions import DuplicateUserEmailException, InvalidCredentialsException, InvalidTokenException
@@ -160,3 +161,13 @@ class AuthService:
         user_id = db_refresh_token.user_id
         access_token, new_refresh_token = await self._generate_tokens(user_id=user_id)
         return RefreshTokenResponse(access_token=access_token, refresh_token=new_refresh_token)
+
+    async def delete_user_tokens(self, user_id: int) -> None:
+        """
+        Delete all access and refresh tokens for a user.
+        Args:
+            user_id (int): The user ID whose tokens should be deleted.
+        """
+        await self.session.execute(delete(RefreshToken).where(RefreshToken.user_id == user_id))
+        await self.session.execute(delete(AccessToken).where(AccessToken.user_id == user_id))
+        await self.session.commit()

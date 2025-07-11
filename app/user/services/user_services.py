@@ -105,3 +105,14 @@ class UserService:
         await self.session.commit()
         await self.session.refresh(current_user)
         return current_user
+
+    async def delete_user(self, current_user: User, auth_service) -> None:
+        """
+        Delete the current user from the database, including all related tokens.
+        Args:
+            current_user (User): The user to delete.
+            auth_service (AuthService): The auth service to handle token deletion.
+        """
+        await auth_service.delete_user_tokens(current_user.id)
+        await self.session.delete(current_user)
+        await self.session.commit()

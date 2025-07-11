@@ -4,12 +4,20 @@ import redis.asyncio as redis
 
 
 class RedisCache:
-    def __init__(self, url: str):
+    def __init__(self, url: str, max_connections: int = 10, timeout: int = 5):
         self.url = url
+        self.max_connections = max_connections
+        self.timeout = timeout
         self.redis = None
 
     async def connect(self):
-        self.redis = await redis.from_url(self.url, decode_responses=True)
+        self.redis = await redis.from_url(
+            self.url,
+            decode_responses=True,
+            max_connections=self.max_connections,
+            socket_connect_timeout=self.timeout,
+            socket_timeout=self.timeout,
+        )
 
     async def close(self):
         if self.redis:

@@ -9,7 +9,7 @@ class AuthSignupRequest(BaseModel):
     password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AuthLoginRequest(BaseModel):
@@ -17,7 +17,7 @@ class AuthLoginRequest(BaseModel):
     password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AuthLoginResponse(BaseModel):
@@ -27,7 +27,7 @@ class AuthLoginResponse(BaseModel):
     refresh_token: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class AuthSignupResponse(BaseModel):
@@ -37,14 +37,14 @@ class AuthSignupResponse(BaseModel):
     refresh_token: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class RefreshTokenResponse(BaseModel):
@@ -53,4 +53,4 @@ class RefreshTokenResponse(BaseModel):
     refresh_token: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

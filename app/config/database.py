@@ -3,8 +3,15 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config.config import settings
 
-# Create async engine
-engine = create_async_engine(settings.ASYNC_DATABASE_URL)
+# Create async engine with connection pooling and performance best practices
+engine = create_async_engine(
+    settings.ASYNC_DATABASE_URL,
+    pool_size=10,  # Number of persistent connections
+    max_overflow=20,  # Extra connections allowed temporarily
+    pool_timeout=30,  # Seconds to wait for a connection
+    pool_recycle=1800,  # Recycle connections every 30 min
+    pool_pre_ping=True,  # Check connection health
+)
 
 # Create async session factory
 AsyncSessionLocal = sessionmaker(bind=engine, class_=AsyncSession, autocommit=False, autoflush=False)

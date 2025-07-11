@@ -9,7 +9,7 @@ class UserResponse(BaseModel):
     email: EmailStr
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserUpdate(BaseModel):
@@ -19,4 +19,4 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=8, description="Password must be at least 8 characters")
 
     class Config:
-        orm_mode = True
+        from_attributes = True

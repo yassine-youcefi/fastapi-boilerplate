@@ -4,12 +4,10 @@ import pytest
 from fastapi import status
 from httpx import AsyncClient
 
-from app.main import app
-
 
 @pytest.mark.asyncio
 async def test_get_user_details():
-    async with AsyncClient(app=app, base_url=os.getenv("BASE_URL", "http://localhost:8000")) as ac:
+    async with AsyncClient(base_url=os.getenv("BASE_URL", "http://localhost:8000")) as ac:
         # First, create a user
         signup_data = {
             "full_name": "User Details",
@@ -17,6 +15,8 @@ async def test_get_user_details():
             "password": "strongpassword123",
         }
         resp = await ac.post("/user/auth/signup", json=signup_data)
+        if resp.status_code != status.HTTP_201_CREATED:
+            print("Signup error:", resp.text)
         assert resp.status_code == status.HTTP_201_CREATED
         user_id = resp.json()["user"]["id"]
 

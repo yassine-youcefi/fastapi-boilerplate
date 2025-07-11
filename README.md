@@ -16,6 +16,7 @@ A robust, production-ready FastAPI backend template following best practices for
 - **pgAdmin**
 - **Pydantic**
 - **Pre-commit hooks**
+- **uv** (fast Python dependency manager)
 
 ---
 
@@ -28,9 +29,13 @@ A robust, production-ready FastAPI backend template following best practices for
 - Pre-commit hooks for linting and formatting (`black`, `isort`, `flake8`)
 - Docker & Docker Compose support for local and production
 - Async SQLAlchemy support
-- Environment variable management with `.env`
+- Environment variable management with `.env` (multi-env ready)
 - pgAdmin integration for easy PostgreSQL management
 - Consistent error responses with a top-level `errors` array
+- **Multi-stage Docker build for security and small images**
+- **Non-root user in containers**
+- **Healthcheck endpoint for Docker and cloud**
+- **uv for dependency management**
 
 ---
 
@@ -68,8 +73,9 @@ fastapi-boilerplate/
 ├── scripts/                # Utility scripts
 ├── tests/                  # Test suite
 ├── requirements.txt        # Python dependencies
-├── Dockerfile              # Docker build file
+├── Dockerfile              # Docker build file (multi-stage, uv, non-root)
 ├── docker-compose.yml      # Docker orchestration
+├── .dockerignore           # Exclude secrets, tests, build artifacts from image
 ├── env.example             # Example environment variables
 ├── .env                    # Actual environment variables (not committed)
 ├── .env.pgadmin            # pgAdmin environment variables
@@ -87,14 +93,16 @@ git clone <repo-url>
 cd fastapi-boilerplate
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
-### 2. Environment Setup
+### 2. Environment Setup (Multi-Env Ready)
 Copy `.env.example` to `.env` and fill in your environment variables:
 ```sh
 cp env.example .env
 ```
+- For production, use `.env.production` and inject at runtime (do **not** copy into the image).
+- For development, use `.env` or `.env.development`.
 
 ### 3. Database Migrations
 ```sh
@@ -106,10 +114,13 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-### 5. Run with Docker Compose
+### 5. Run with Docker Compose (Recommended)
 ```sh
 docker-compose up --build
 ```
+- The Dockerfile uses a multi-stage build, non-root user, and uv for dependencies.
+- The `.dockerignore` ensures secrets, tests, and build artifacts are not copied into the image.
+- Environment variables are injected at runtime via Docker Compose.
 
 ### 6. Enable Pre-commit Hooks
 ```sh
@@ -127,6 +138,14 @@ pre-commit install
 
 ---
 
+## 🩺 Healthcheck Endpoint
+- The app exposes a healthcheck endpoint for Docker and cloud:
+  - `GET /health` → `{ "status": "ok" }`
+- Used by the Dockerfile's `HEALTHCHECK` instruction.
+- You can extend this endpoint for readiness/liveness or DB/Redis checks.
+
+---
+
 ## 🧩 Alembic Migrations
 - All SQLAlchemy models in `app/user/models/`, `app/auth/models/`, and other modules are auto-detected by Alembic.
 - To create a new migration after changing models:
@@ -137,19 +156,14 @@ pre-commit install
 
 ---
 
-## 🛡️ Error Handling
-- All API errors are returned as a top-level `errors` array:
-  ```json
-  {
-    "errors": [
-      {
-        "error_code": "DUPLICATE_USER_EMAIL",
-        "message": "User with email example@domain.com already exists"
-      }
-    ]
-  }
-  ```
-- Validation errors and custom exceptions follow this format for consistency and easy frontend integration.
+## 🛡️ Security & Best Practices
+- **Never commit real secrets** (`.env` is in `.gitignore`).
+- Use strong, random secrets in production (`JWT_SECRET`, `DB_PASSWORD`, etc.).
+- Use Docker secrets or environment variables for sensitive data in production.
+- The Dockerfile uses a non-root user and multi-stage build for security.
+- The `.dockerignore` file prevents secrets, tests, and build artifacts from being copied into the image.
+- Do not expose unnecessary ports in production.
+- Use resource limits in production deployments.
 
 ---
 
@@ -202,6 +216,7 @@ This will show exactly what changes each hook would make and help you fix issues
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Alembic Documentation](https://alembic.sqlalchemy.org/)
 - [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- [uv (Python dependency manager)](https://github.com/astral-sh/uv)
 
 ---
 

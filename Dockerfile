@@ -1,56 +1,47 @@
-# syntax = docker/dockerfile:1.2.1
+# syntax=docker/dockerfile:1.4
 
-FROM python:3.13
+FROM python:3.13.5-slim AS base
 
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV APP_ENV=development
+# Install uv (fast dependency manager)
+RUN pip install --upgrade pip && pip install uv
 
-# Set environment variables for Celery
-ENV C_FORCE_ROOT="true"
-
-# Add a new user
+# Create non-root user
 RUN useradd -ms /bin/bash fastapi
 
-# Set work directory
 WORKDIR /code
 
-# Copy requirements file separately to leverage Docker cache
+# Copy only requirements for dependency install
 COPY requirements.txt /code/
 
-# Install dependencies (no need for distutils/setuptools for redis[asyncio])
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+# Install dependencies with uv
+RUN uv pip install -r requirements.txt --system --no-cache-dir
 
-# Copy the source code
+# --- Final stage ---
+FROM python:3.13.5-slim AS final
+
+WORKDIR /code
+
+# Copy installed packages and executables from base
+COPY --from=base /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=base /usr/local/bin/uv /usr/local/bin/uv
+COPY --from=base /usr/local/bin/uvicorn /usr/local/bin/uvicorn
+
+# Copy app source
 COPY . /code/
 
-# Change ownership to the created user
-RUN chown -R fastapi /code
-# Make sure the user has write access to the /code directory
-RUN chmod -R u+w /code
-# Switch to the newly created user
+# Create non-root user and set permissions
+RUN useradd -ms /bin/bash fastapi && chown -R fastapi /code && chmod -R u+w /code
 USER fastapi
 
-# Expose port
 EXPOSE 8000
 
-# Add HEALTHCHECK instruction
-# HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:8000/admin/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:8000/health || exit 1
 
+# Set ENV at runtime (not build time)
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-# Command to run Uvicorn
-# For Development (APP_ENV=development):
-
-#     The command will run Uvicorn with the --reload option and use app/config/uvicorn_conf.py for logging configuration.
-
-# For Production (default case):
-
-#     It will run Uvicorn without the --reload option and use app/config/prod_uvicorn_conf.py for production-specific logging configuration.
-
-CMD ["sh", "-c", "if [ \"$APP_ENV\" = \"development\" ]; then \
-    uvicorn app.main:app --reload --log-config app/config/uvicorn_conf.py --host $host --port $port; \
-    else uvicorn app.main:app --log-config app/config/prod_uvicorn_conf.py --host $host --port $port; fi"]
+CMD ["sh", "-c", "if [ \"$ENVIRONMENT\" = \"dev\" ]; then uvicorn app.main:app --reload --host 0.0.0.0 --port 8000; else uvicorn app.main:app --host 0.0.0.0 --port 8000; fi"]
 
 
 

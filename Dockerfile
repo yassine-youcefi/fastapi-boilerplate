@@ -2,7 +2,8 @@
 
 FROM python:3.13.5-slim AS base
 
-# Install uv (fast dependency manager)
+# Install build tools and uv
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
 RUN pip install --upgrade pip && pip install uv
 
 # Create non-root user

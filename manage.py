@@ -2,38 +2,50 @@
 import code
 import sys
 
-try:
-    from IPython import start_ipython
-
-    ipython_available = True
-except ImportError:
-    ipython_available = False
-
 
 def shell():
     # Import commonly used objects
+    import asyncio
+
     from app.auth.models import token_models
-    from app.integrations.database import SessionLocal
+    from app.integrations.database import AsyncSessionLocal
     from app.main import app
     from app.user.models import user_models
 
-    session = SessionLocal()
+    async def get_async_session():
+        async with AsyncSessionLocal() as session:
+            return session
+
+    # Create the session variable by default (for bpython/IPython with top-level await)
+    session = None
+    try:
+        loop = asyncio.get_event_loop()
+        session = loop.run_until_complete(get_async_session())
+    except Exception:
+        pass  # If event loop is already running (e.g., in IPython), session will remain None
+
     banner = (
-        "\nFastAPI Interactive Shell\n\n"
+        "\nFastAPI Async Interactive Shell (bpython recommended)\n\n"
         "Available objects:\n"
         "  app       - FastAPI app instance\n"
-        "  session   - SQLAlchemy session\n"
-        "  user_models, token_models - ORM models\n"
+        "  session   - AsyncSession (already created, or use 'await get_async_session()')\n"
+        "  get_async_session() - async function to get an AsyncSession\n"
+        "  user_models, token_models - ORM models\n\n"
+        "In bpython, you can use 'await get_async_session()' to get a session if 'session' is None.\n"
     )
     local_vars = {
         "app": app,
+        "get_async_session": get_async_session,
         "session": session,
         "user_models": user_models,
         "token_models": token_models,
+        "asyncio": asyncio,
     }
-    if ipython_available:
-        start_ipython(argv=[], user_ns=local_vars)
-    else:
+    try:
+        import bpython
+
+        bpython.embed(locals_=local_vars, banner=banner)
+    except ImportError:
         code.interact(banner=banner, local=local_vars)
 
 

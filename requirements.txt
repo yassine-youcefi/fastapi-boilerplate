@@ -40,7 +40,7 @@ isort==5.13.2
 flake8==7.0.0
 pre-commit==3.7.1
 
-ipython==9.4.0
+bpython
 
 # Optional: Production ASGI server
 # gunicorn==22.0.0

@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     DB_NAME: str
+    DB_TEST_NAME: str = "fastapi_test_db"
     DB_TIMEOUT: int = 30
     SERVER_TIMEZONE: str = "UTC+4"
 
@@ -60,6 +61,13 @@ class Settings(BaseSettings):
         if self.REDIS_URL:
             return self.REDIS_URL
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+
+    @property
+    def ASYNC_TEST_DATABASE_URL(self) -> str:
+        """Get the async test database URL (with asyncpg driver)"""
+        return (
+            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_TEST_NAME}"
+        )
 
 
 settings = Settings()

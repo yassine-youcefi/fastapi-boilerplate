@@ -2,8 +2,8 @@
 
 FROM python:3.13.5-slim AS base
 
-# Install build tools and uv
-RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+# Install build tools, uv, and curl
+RUN apt-get update && apt-get install -y gcc curl && rm -rf /var/lib/apt/lists/*
 RUN pip install --upgrade pip && pip install uv
 
 # Create non-root user
@@ -28,6 +28,9 @@ COPY --from=base /usr/local/bin/uv /usr/local/bin/uv
 COPY --from=base /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 COPY --from=base /usr/local/bin/celery /usr/local/bin/celery
 COPY --from=base /usr/local/bin/alembic /usr/local/bin/alembic
+
+# Install curl in final image
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy app source
 COPY . /code/

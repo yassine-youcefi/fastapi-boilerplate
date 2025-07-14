@@ -27,6 +27,7 @@ COPY --from=base /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.
 COPY --from=base /usr/local/bin/uv /usr/local/bin/uv
 COPY --from=base /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 COPY --from=base /usr/local/bin/celery /usr/local/bin/celery
+COPY --from=base /usr/local/bin/alembic /usr/local/bin/alembic
 
 # Copy app source
 COPY . /code/

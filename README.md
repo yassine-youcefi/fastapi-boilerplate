@@ -156,29 +156,45 @@ pre-commit install
 
 ---
 
-## 🐚 Custom Interactive Shell (`manage.py shell`)
+## 🐚 Custom Interactive Shell & Management Commands (`manage.py`)
 
-This project includes a custom `manage.py` tool for launching an interactive shell with your FastAPI app context, async DB session, and models pre-imported. It uses [bpython](https://bpython-interpreter.org/) for a rich interactive experience (falls back to standard shell if not installed).
+This project includes a custom `manage.py` tool for interactive development and database management, inspired by Django's CLI.
 
-### Usage
+### Interactive Shell
+Launch a rich async shell with your FastAPI app context, async DB session, and models pre-imported:
+
 ```sh
 python manage.py shell
 ```
-
-- If you have `bpython` installed, you'll get a modern shell with tab completion, syntax highlighting, and top-level `await` support.
-- The following objects are available by default:
+- Uses [bpython](https://bpython-interpreter.org/) if installed (recommended), else falls back to the standard shell.
+- **Available objects:**
   - `app` — FastAPI app instance
-  - `session` — Async SQLAlchemy session (if possible, else use `await get_async_session()`)
+  - `session` — Async SQLAlchemy session (created by default, or use `await get_async_session()`)
   - `get_async_session()` — async function to get a new session
   - `user_models`, `token_models` — ORM models
-- Example usage in the shell:
+- **Example usage:**
   ```python
-  # Get a user by ID using your service
   from app.user.services.user_services import UserService
   user = await UserService(session).get_user_by_id(1)
   print(user)
   ```
 - If `session` is `None`, use `await get_async_session()` to create one.
+
+### Database Migration Commands
+Run Alembic migrations with familiar commands:
+
+- **Create a new migration (with optional message):**
+  ```sh
+  python manage.py makemigrations "your message here"
+  # or just
+  python manage.py makemigrations
+  ```
+  (If no message is provided, defaults to "auto")
+
+- **Apply all migrations:**
+  ```sh
+  python manage.py migrate
+  ```
 
 ---
 

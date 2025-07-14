@@ -56,6 +56,15 @@ def main():
     command = sys.argv[1]
     if command == "shell":
         shell()
+    elif command == "makemigrations":
+        import subprocess
+
+        msg = sys.argv[2] if len(sys.argv) > 2 else "auto"
+        subprocess.run(["alembic", "revision", "--autogenerate", "-m", msg], check=True)
+    elif command == "migrate":
+        import subprocess
+
+        subprocess.run(["alembic", "upgrade", "head"], check=True)
     else:
         print(f"Unknown command: {command}")
         sys.exit(1)

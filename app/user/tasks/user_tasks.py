@@ -1,9 +1,9 @@
-from app.integrations.celery_app import celery_app
+from celery import shared_task
 
 
-def user_created_task(user_email: str):
-    print(f"Hi {user_email}")
-
-
-# Register as a Celery task
-task = celery_app.task(user_created_task)
+@shared_task(bind=True, queue="user-queue", max_retries=3, default_retry_delay=10)
+def user_created_task(self, user_email: str):
+    try:
+        print(f"Hi {user_email}")
+    except Exception as exc:
+        raise self.retry(exc=exc)

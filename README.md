@@ -156,6 +156,32 @@ pre-commit install
 
 ---
 
+## 🐚 Custom Interactive Shell (`manage.py shell`)
+
+This project includes a custom `manage.py` tool for launching an interactive shell with your FastAPI app context, async DB session, and models pre-imported. It uses [bpython](https://bpython-interpreter.org/) for a rich interactive experience (falls back to standard shell if not installed).
+
+### Usage
+```sh
+python manage.py shell
+```
+
+- If you have `bpython` installed, you'll get a modern shell with tab completion, syntax highlighting, and top-level `await` support.
+- The following objects are available by default:
+  - `app` — FastAPI app instance
+  - `session` — Async SQLAlchemy session (if possible, else use `await get_async_session()`)
+  - `get_async_session()` — async function to get a new session
+  - `user_models`, `token_models` — ORM models
+- Example usage in the shell:
+  ```python
+  # Get a user by ID using your service
+  from app.user.services.user_services import UserService
+  user = await UserService(session).get_user_by_id(1)
+  print(user)
+  ```
+- If `session` is `None`, use `await get_async_session()` to create one.
+
+---
+
 ## 🛡️ Security & Best Practices
 - **Never commit real secrets** (`.env` is in `.gitignore`).
 - Use strong, random secrets in production (`JWT_SECRET`, `DB_PASSWORD`, etc.).

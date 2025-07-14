@@ -7,13 +7,12 @@ services:
     container_name: celery-worker
     command: celery -A app.integrations.celery_app.celery_app worker --loglevel=info
     env_file: .env
-    depends_on:
-      - redis
-      - db
     volumes:
       - .:/code
     networks:
       - fastapi_network
+    healthcheck:
+      disable: true
 
   celery-beat:
     build:
@@ -21,23 +20,22 @@ services:
     container_name: celery-beat
     command: celery -A app.integrations.celery_app.celery_app beat --loglevel=info --scheduler celery.beat:PersistentScheduler
     env_file: .env
-    depends_on:
-      - redis
-      - db
     volumes:
       - .:/code
     networks:
       - fastapi_network
+    healthcheck:
+      disable: true
 
   flower:
     image: mher/flower:2.0.1
     container_name: flower
-    command: flower --broker=${CELERY_BROKER_URL} --port=5555
+    environment:
+      - FLOWER_BROKER=redis://${REDIS_HOST}:${REDIS_PORT}
+      - FLOWER_PORT=5555
     env_file: .env
     ports:
       - "5555:5555"
-    depends_on:
-      - redis
     networks:
       - fastapi_network
 

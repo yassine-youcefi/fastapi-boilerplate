@@ -25,6 +25,7 @@ WORKDIR /code
 COPY --from=base /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=base /usr/local/bin/uv /usr/local/bin/uv
 COPY --from=base /usr/local/bin/uvicorn /usr/local/bin/uvicorn
+COPY --from=base /usr/local/bin/celery /usr/local/bin/celery
 
 # Copy app source
 COPY . /code/
@@ -34,8 +35,6 @@ RUN useradd -ms /bin/bash fastapi && chown -R fastapi /code && chmod -R u+w /cod
 USER fastapi
 
 EXPOSE 8000
-
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl --fail http://localhost:8000/health || exit 1
 
 # Set ENV at runtime (not build time)
 ENV PYTHONUNBUFFERED=1 \

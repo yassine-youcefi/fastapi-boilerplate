@@ -1,9 +1,17 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.integrations.database import Base
+
+# Association table for many-to-many relationship between User and Role
+user_roles = Table(
+    "user_roles",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("role_id", Integer, ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True),
+)
 
 
 class User(Base):
@@ -14,11 +22,10 @@ class User(Base):
         id (int): Primary key.
         full_name (str): The user's full name.
         email (str): The user's unique email address.
-        role_id (int): Foreign key linking to the Role table.
         password (str): The user's hashed password.
         is_active (bool): Indicates if the user account is active.
         created_at (datetime): The timestamp when the user was created.
-        role (Role): Relationship to the Role model.
+        roles (list[Role]): List of roles assigned to the user.
     """
 
     __tablename__ = "users"
@@ -27,13 +34,17 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
-    # Relationship with Role
-    role = relationship("Role", back_populates="users", lazy="joined")
+    # Many-to-many relationship with Role
+    roles = relationship(
+        "Role",
+        secondary=user_roles,
+        back_populates="users",
+        lazy="joined",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,7 +52,7 @@ class User(Base):
     def __repr__(self):
         return (
             f"<User(id={self.id}, email={self.email}, full_name={self.full_name}, "
-            f"role={self.role.name if self.role else None})>"
+            f"roles={[role.name for role in self.roles] if self.roles else None})>"
         )
 
 
@@ -63,8 +74,13 @@ class Role(Base):
     name = Column(String, unique=True, index=True, nullable=False)
     permissions = Column(ARRAY(String), nullable=False)
 
-    # Relationship with User
-    users = relationship("User", back_populates="role", lazy="select")
+    # Many-to-many relationship with User
+    users = relationship(
+        "User",
+        secondary=user_roles,
+        back_populates="roles",
+        lazy="select",
+    )
 
     def __repr__(self):
         return f"<Role(id={self.id}, name={self.name}, permissions={self.permissions})>"

@@ -9,6 +9,7 @@ from starlette.config import Config
 from app.auth.routes.auth_routers import auth_router
 from app.dependencies import get_redis_cache
 from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
+from app.integrations.celery_app import create_celery_app
 from app.user.routes.user_routers import user_router
 
 # =========================
@@ -101,6 +102,7 @@ def create_app() -> FastAPI:
 # App Instance & Health Endpoint
 # =========================
 app = create_app()
+celery = create_celery_app()
 
 
 @app.get("/health", include_in_schema=False)

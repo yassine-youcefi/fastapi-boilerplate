@@ -6,7 +6,7 @@ services:
       context: .
     container_name: celery-worker
     command: >
-      /bin/bash -c "celery -A app.integrations.celery_app.celery_app worker -l info -Q auth-queue -n worker-auth@%h & celery -A app.integrations.celery_app.celery_app worker --loglevel=info -Q user-queue -n worker-user@%h"
+      /bin/bash -c "celery -A app.main.celery worker -l info -Q auth-queue -n worker-auth@%h & celery -A app.main.celery worker --loglevel=info -Q user-queue -n worker-user@%h"
     env_file: .env
     volumes:
       - .:/code
@@ -19,7 +19,7 @@ services:
     build:
       context: .
     container_name: celery-beat
-    command: celery -A app.integrations.celery_app.celery_app beat --loglevel=info --scheduler celery.beat:PersistentScheduler
+    command: celery -A app.main.celery beat --loglevel=info --scheduler celery.beat:PersistentScheduler
     env_file: .env
     volumes:
       - .:/code

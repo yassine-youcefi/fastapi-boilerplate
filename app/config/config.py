@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"  # Default Redis URL format
 
     # Celery configuration
-    CELERY_BROKER_URL: str = REDIS_URL
+    CELERY_BROKER_URL: str
     CELERY_RESULT_BACKEND: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB + 1}"
 
     model_config = SettingsConfigDict(

@@ -28,12 +28,11 @@ services:
       disable: true
 
   flower:
-    image: mher/flower:2.0.1
+    image: mher/flower
     container_name: flower
-    environment:
-      - FLOWER_BROKER=redis://${REDIS_HOST}:${REDIS_PORT}
-      - FLOWER_PORT=5555
     env_file: .env
+    environment:
+      - FLOWER_BROKER=${CELERY_BROKER_URL}
     ports:
       - "5555:5555"
     networks:

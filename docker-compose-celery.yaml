@@ -5,7 +5,8 @@ services:
     build:
       context: .
     container_name: celery-worker
-    command: celery -A app.integrations.celery_app.celery_app worker --loglevel=info -Q auth-queue,user-queue
+    command: >
+      /bin/bash -c "celery -A app.integrations.celery_app.celery_app worker -l info -Q auth-queue -n worker-auth@%h & celery -A app.integrations.celery_app.celery_app worker --loglevel=info -Q user-queue -n worker-user@%h"
     env_file: .env
     volumes:
       - .:/code

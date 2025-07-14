@@ -24,10 +24,10 @@ WORKDIR /code
 
 # Copy installed packages and executables from base
 COPY --from=base /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
-COPY --from=base /usr/local/bin/uv /usr/local/bin/uv
-COPY --from=base /usr/local/bin/uvicorn /usr/local/bin/uvicorn
-COPY --from=base /usr/local/bin/celery /usr/local/bin/celery
-COPY --from=base /usr/local/bin/alembic /usr/local/bin/alembic
+COPY --from=base /usr/local/bin/ /usr/local/bin/
+
+# Ensure celery is installed and entrypoint is present
+RUN pip install --no-cache-dir celery[redis]
 
 # Install curl in final image
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*

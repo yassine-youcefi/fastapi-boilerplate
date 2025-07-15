@@ -44,3 +44,7 @@ bpython
 
 # Optional: Production ASGI server
 # gunicorn==22.0.0
+
+# AWS S3
+boto3==1.39.4
+aioboto3==15.0.0

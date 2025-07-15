@@ -3,6 +3,7 @@ import logging
 from app.config.config import settings as app_settings
 from app.integrations.database import AsyncSessionLocal
 from app.integrations.redis_cache import RedisCache
+from app.integrations.s3 import AsyncS3Client
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,17 @@ async def get_redis_cache() -> RedisCache:
             raise RuntimeError("Could not connect to Redis.") from e
         get_redis_cache._instance = instance
     return get_redis_cache._instance
+
+
+async def get_s3_client():
+    """
+    Dependency that provides an async S3 client (AsyncS3Client) as an async context manager.
+    Usage:
+        async def route(s3=Depends(get_s3_client)):
+            async with s3 as client:
+                ...
+    """
+    return AsyncS3Client()
 
 
 def get_settings():

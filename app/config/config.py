@@ -52,6 +52,13 @@ class Settings(BaseSettings):
     JWT_ACCESS_EXPIRES_IN: int = 36000  # Access token expiry (seconds)
     JWT_REFRESH_EXPIRES_IN: int = 604800  # Refresh token expiry (seconds)
 
+    # --- AWS S3 Config ---
+    S3_ACCESS_KEY: str  # AWS S3 access key
+    S3_SECRET_KEY: str  # AWS S3 secret key
+    S3_REGION: str = "us-east-1"  # AWS S3 region
+    S3_BUCKET: str  # AWS S3 bucket name
+    S3_ENDPOINT_URL: str = None  # Optional: custom endpoint (e.g., for MinIO/localstack)
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

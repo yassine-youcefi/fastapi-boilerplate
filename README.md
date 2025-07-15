@@ -245,6 +245,53 @@ def upload_file_sync(file_path, key):
 
 ---
 
+## Celery and Async Service Integration
+
+### Async Business Logic in Celery Tasks
+
+Your service layer (e.g., UserService, MediaService) and integrations (e.g., S3) are written as async for FastAPI. Celery tasks, however, are synchronous by default. To reuse async business logic in Celery tasks **without duplicating or rewriting logic**, use the [`asgiref.async_to_sync`](https://github.com/django/asgiref) utility.
+
+#### Why async_to_sync?
+- Celery does not natively support async/await tasks (see [Celery Issue #3884](https://github.com/celery/celery/issues/3884)).
+- `async_to_sync` allows you to safely call async methods from synchronous Celery tasks, handling event loop management for you.
+- This is more robust than using `asyncio.run` directly, especially if you might call from a thread or in more complex environments.
+
+#### Example: Using an Async Service in a Celery Task
+
+```python
+from celery import shared_task
+from asgiref.sync import async_to_sync
+from app.user.services.user_services import UserService
+
+@shared_task
+def create_user_task(user_data):
+    # Call the async service method from sync Celery task
+    return async_to_sync(UserService().create_user)(**user_data)
+```
+
+#### Example: Using Async S3 Client in a Celery Task
+
+```python
+from celery import shared_task
+from asgiref.sync import async_to_sync
+from app.integrations.s3 import AsyncS3Client
+
+@shared_task
+def upload_to_s3_task(key, file_data):
+    async def _upload():
+        async with AsyncS3Client() as s3:
+            await s3.upload_file(file_data, key)
+    return async_to_sync(_upload)()
+```
+
+#### Notes
+- Keep your business logic async for FastAPI.
+- Use `async_to_sync` in Celery tasks to call async service methods.
+- If your service requires dependencies (e.g., DB session, S3 client), create them inside the task as needed.
+- For very high-throughput or long-running async tasks, consider offloading to background workers or using a pure-async task queue (e.g., Dramatiq, Arq), but for most use cases, this pattern is robust and production-ready.
+
+---
+
 ## 🛡️ Security & Best Practices
 - **Never commit real secrets** (`.env` is in `.gitignore`).
 - Use strong, random secrets in production (`JWT_SECRET`, `DB_PASSWORD`, etc.).

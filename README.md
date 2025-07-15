@@ -198,6 +198,53 @@ Run Alembic migrations with familiar commands:
 
 ---
 
+## ☁️ AWS S3 Integration
+
+- S3 credentials and config are managed via environment variables in `.env`:
+  - `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_BUCKET`, `S3_ENDPOINT_URL`
+- The config supports both AWS and S3-compatible services (e.g., MinIO, LocalStack) via `S3_ENDPOINT_URL`.
+- For FastAPI endpoints or services that require high concurrency (e.g., uploading/downloading many files), use `aioboto3` for async S3 operations.
+- For Celery tasks, use synchronous `boto3` unless you have an async worker pool.
+- Example async usage in FastAPI:
+
+```python
+import aioboto3
+from app.config.config import settings
+
+async def upload_file_async(file_path, key):
+    session = aioboto3.Session()
+    async with session.client(
+        "s3",
+        aws_access_key_id=settings.S3_ACCESS_KEY,
+        aws_secret_access_key=settings.S3_SECRET_KEY,
+        region_name=settings.S3_REGION,
+        endpoint_url=settings.S3_ENDPOINT_URL,
+    ) as s3:
+        await s3.upload_file(file_path, settings.S3_BUCKET, key)
+```
+
+- Example sync usage in Celery:
+
+```python
+import boto3
+from app.config.config import settings
+
+def upload_file_sync(file_path, key):
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=settings.S3_ACCESS_KEY,
+        aws_secret_access_key=settings.S3_SECRET_KEY,
+        region_name=settings.S3_REGION,
+        endpoint_url=settings.S3_ENDPOINT_URL,
+    )
+    s3.upload_file(file_path, settings.S3_BUCKET, key)
+```
+
+- Always use context managers for S3 clients.
+- See the [Python and Boto3 Performance Adventures](https://joelmccoy.medium.com/python-and-boto3-performance-adventures-synchronous-vs-asynchronous-aws-api-interaction-22f625ec6909) article for more details on sync vs async AWS usage.
+
+---
+
 ## 🛡️ Security & Best Practices
 - **Never commit real secrets** (`.env` is in `.gitignore`).
 - Use strong, random secrets in production (`JWT_SECRET`, `DB_PASSWORD`, etc.).

@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
@@ -15,7 +16,11 @@ from app.user.routes.user_routers import user_router
 # =========================
 # Logging Configuration
 # =========================
-logging.basicConfig(level=logging.DEBUG if settings.DEBUG else logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG if settings.DEBUG else logging.INFO,
+    format='{"time": "%(asctime)s", "level": "%(levelname)s", "message": %(message)s}',
+)
+logger = logging.getLogger("fastapi_boilerplate")
 
 # =========================
 # App Config from Settings
@@ -37,8 +42,9 @@ app_configs = {
             "description": "APIs related to user authentication and token management.",
         },
     ],
-    "docs_url": "/docs" if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
-    "redoc_url": "/redoc" if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
+    "docs_url": settings.DOCS_URL if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
+    "redoc_url": settings.REDOC_URL if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
+    "openapi_url": settings.OPENAPI_URL if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
 }
 if settings.ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["openapi_url"] = None
@@ -51,25 +57,30 @@ if settings.ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
 # =========================
 def create_app() -> FastAPI:
     """App factory for FastAPI application."""
-    app = FastAPI(**app_configs)
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Startup
+        logger.info("Starting FastAPI application.")
+        try:
+            await get_redis_cache()
+        except Exception as e:
+            logger.error(f"Redis connection failed at startup: {e}")
+        yield
+        # Shutdown
+        if hasattr(get_redis_cache, "_instance"):
+            await get_redis_cache._instance.close()
+
+    app = FastAPI(lifespan=lifespan, **app_configs)
 
     # CORS configuration
-    if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT:
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
-    else:
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=[settings.BASE_URL],  # You can add a comma-separated list in settings if needed
-            allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT", "DELETE"],
-            allow_headers=["Authorization", "Content-Type"],
-        )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_credentials=settings.ALLOW_CREDENTIALS,
+        allow_methods=settings.ALLOW_METHODS,
+        allow_headers=settings.ALLOW_HEADERS,
+    )
 
     # Exception handlers
     app.add_exception_handler(Exception, custom_http_exception_handler)
@@ -79,19 +90,6 @@ def create_app() -> FastAPI:
     # Routers (add API versioning prefix)
     app.include_router(user_router, prefix="/user", tags=["User"])
     app.include_router(auth_router, prefix="/user/auth", tags=["Auth"])
-
-    # Startup/Shutdown events (to be refactored to lifespan in next step)
-    @app.on_event("startup")
-    async def startup_event():
-        try:
-            await get_redis_cache()
-        except Exception as e:
-            logging.error(f"Redis connection failed at startup: {e}")
-
-    @app.on_event("shutdown")
-    async def shutdown_event():
-        if hasattr(get_redis_cache, "_instance"):
-            await get_redis_cache._instance.close()
 
     return app
 
@@ -105,4 +103,13 @@ celery = create_celery_app()
 
 @app.get("/health", include_in_schema=False)
 async def health_check():
-    return {"status": "ok"}
+    redis_status = "unknown"
+    try:
+        redis_cache = await get_redis_cache()
+        if await redis_cache.ping():
+            redis_status = "ok"
+        else:
+            redis_status = "unreachable"
+    except Exception as e:
+        redis_status = f"error: {str(e)}"
+    return {"status": "ok", "redis": redis_status}

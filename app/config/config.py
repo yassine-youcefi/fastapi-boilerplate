@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,37 +9,48 @@ class Settings(BaseSettings):
     Loads variables from environment and .env file.
     """
 
-    PROJECT_NAME: str = "fastapi-boilerplate"
-    DEBUG: bool = True
-    ENVIRONMENT: str = "dev"  # Add this line to match .env
-    BASE_URL: str = "http://localhost:8000"
+    # --- FastAPI App Config ---
+    PROJECT_NAME: str = "fastapi-boilerplate"  # The name of the project
+    DEBUG: bool = True  # Enable debug mode
+    ENVIRONMENT: str = "dev"  # Environment: dev, test, prod
+    BASE_URL: str = "http://localhost:8000"  # Base URL for the app
+    DOCS_URL: str = "/docs"  # Swagger docs URL
+    REDOC_URL: str = "/redoc"  # ReDoc docs URL
+    OPENAPI_URL: str = "/openapi.json"  # OpenAPI schema URL
+    API_V1_PREFIX: str = "/api/v1"  # API version prefix
+    ALLOWED_ORIGINS: List[str] = ["*"]  # CORS allowed origins
+    ALLOW_CREDENTIALS: bool = True  # CORS allow credentials
+    ALLOW_METHODS: List[str] = ["*"]  # CORS allowed methods
+    ALLOW_HEADERS: List[str] = ["*"]  # CORS allowed headers
 
-    JWT_SECRET: str
-    JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_EXPIRES_IN: int = 36000
-    JWT_REFRESH_EXPIRES_IN: int = 604800
+    # --- Database Config ---
+    DB_USER: str  # Database username
+    DB_PASSWORD: str  # Database password
+    DB_HOST: str  # Database host
+    DB_PORT: str  # Database port
+    DB_NAME: str  # Database name
+    DB_TEST_NAME: str = "fastapi_test_db"  # Test database name
+    ECHO_SQL: bool = True  # SQLAlchemy echo SQL
+    DB_POOL_SIZE: int = 10  # DB connection pool size
+    DB_MAX_OVERFLOW: int = 5  # DB max overflow
+    DB_TIMEOUT: int = 30  # DB connection timeout (seconds)
+    SERVER_TIMEZONE: str = "UTC+4"  # Server timezone
 
-    ECHO_SQL: bool = True
-    DB_POOL_SIZE: int = 10
-    DB_MAX_OVERFLOW: int = 5
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: str
-    DB_NAME: str
-    DB_TEST_NAME: str = "fastapi_test_db"
-    DB_TIMEOUT: int = 30
-    SERVER_TIMEZONE: str = "UTC+4"
+    # --- Redis Config ---
+    REDIS_HOST: str = "redis"  # Redis host
+    REDIS_PORT: int = 6379  # Redis port
+    REDIS_DB: int = 0  # Redis DB index
+    REDIS_URL: str = "redis://redis:6379/0"  # Default Redis URL format
 
-    # Redis configuration
-    REDIS_HOST: str = "redis"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_URL: str = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"  # Default Redis URL format
+    # --- Celery Config ---
+    CELERY_BROKER_URL: str  # Celery broker URL
+    CELERY_RESULT_BACKEND: str = REDIS_URL  # Celery result backend
 
-    # Celery configuration
-    CELERY_BROKER_URL: str
-    CELERY_RESULT_BACKEND: str = REDIS_URL
+    # --- JWT/Auth Config ---
+    JWT_SECRET: str  # JWT secret key
+    JWT_ALGORITHM: str = "HS256"  # JWT algorithm
+    JWT_ACCESS_EXPIRES_IN: int = 36000  # Access token expiry (seconds)
+    JWT_REFRESH_EXPIRES_IN: int = 604800  # Refresh token expiry (seconds)
 
     model_config = SettingsConfigDict(
         env_file=".env",

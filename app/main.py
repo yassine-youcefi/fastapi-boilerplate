@@ -22,7 +22,7 @@ logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,
     format='{"time": "%(asctime)s", "level": "%(levelname)s", "message": %(message)s}',
 )
-logger = logging.getLogger("fastapi_boilerplate")
+logger = logging.getLogger(__name__)
 
 # =========================
 # App Config from Settings
@@ -63,11 +63,16 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # Startup
-        logger.info("Starting FastAPI application.")
+        import multiprocessing
+
+        print("Starting FastAPI application.")
+        print(f"Environment: {settings.ENVIRONMENT}")
+        print(f"Debug: {settings.DEBUG}")
+        print(f"Workers (CPU count): {multiprocessing.cpu_count()}")
         try:
             await get_redis_cache()
         except Exception as e:
-            logger.error(f"Redis connection failed at startup: {e}")
+            print(f"Redis connection failed at startup: {e}")
         yield
         # Shutdown
         if hasattr(get_redis_cache, "_instance"):

@@ -1,6 +1,6 @@
 import logging
 
-from app.config.config import settings
+from app.config.config import settings as app_settings
 from app.integrations.database import AsyncSessionLocal
 from app.integrations.redis_cache import RedisCache
 
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 async def get_redis_cache() -> RedisCache:
     """Dependency that provides the RedisCache instance."""
     if not hasattr(get_redis_cache, "_instance"):
-        instance = RedisCache(url=settings.REDIS_URI)
+        instance = RedisCache(url=app_settings.REDIS_URI)
         try:
             await instance.connect()
             if not await instance.ping():
@@ -22,6 +22,11 @@ async def get_redis_cache() -> RedisCache:
             raise RuntimeError("Could not connect to Redis.") from e
         get_redis_cache._instance = instance
     return get_redis_cache._instance
+
+
+def get_settings():
+    """Dependency that provides the app settings (for testability/overrides)."""
+    return app_settings
 
 
 async def get_db():

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from sqlalchemy import text
 
 from app.auth.routes.auth_routers import auth_router
@@ -79,6 +80,9 @@ def create_app() -> FastAPI:
             await get_redis_cache._instance.close()
 
     app = FastAPI(lifespan=lifespan, **app_configs)
+
+    # GZip compression middleware
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     # CORS configuration
     app.add_middleware(

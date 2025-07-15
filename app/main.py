@@ -4,9 +4,9 @@ from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.config import Config
 
 from app.auth.routes.auth_routers import auth_router
+from app.config.config import settings
 from app.dependencies import get_redis_cache
 from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
 from app.integrations.celery_app import create_celery_app
@@ -15,20 +15,18 @@ from app.user.routes.user_routers import user_router
 # =========================
 # Logging Configuration
 # =========================
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG if settings.DEBUG else logging.INFO)
 
 # =========================
-# Environment & App Config
+# App Config from Settings
 # =========================
-config = Config(".env")
-ENVIRONMENT = config("ENVIRONMENT", cast=str, default="dev")
 SHOW_DOCS_ENVIRONMENT = ("dev", "test")
 
 app_configs = {
-    "title": "Fastapi Boilerplate",
+    "title": settings.PROJECT_NAME,
     "description": "A boilerplate for FastAPI applications with user authentication and Redis caching.",
     "version": "0.0.1",
-    "debug": ENVIRONMENT in SHOW_DOCS_ENVIRONMENT,
+    "debug": settings.DEBUG,
     "openapi_tags": [
         {
             "name": "User",
@@ -39,10 +37,10 @@ app_configs = {
             "description": "APIs related to user authentication and token management.",
         },
     ],
-    "docs_url": "/docs" if ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
-    "redoc_url": "/redoc" if ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
+    "docs_url": "/docs" if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
+    "redoc_url": "/redoc" if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT else None,
 }
-if ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
+if settings.ENVIRONMENT not in SHOW_DOCS_ENVIRONMENT:
     app_configs["openapi_url"] = None
     app_configs["docs_url"] = None
     app_configs["redoc_url"] = None
@@ -56,7 +54,7 @@ def create_app() -> FastAPI:
     app = FastAPI(**app_configs)
 
     # CORS configuration
-    if ENVIRONMENT in SHOW_DOCS_ENVIRONMENT:
+    if settings.ENVIRONMENT in SHOW_DOCS_ENVIRONMENT:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"],
@@ -67,7 +65,7 @@ def create_app() -> FastAPI:
     else:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=["https://your-production-domain.com"],
+            allow_origins=[settings.BASE_URL],  # You can add a comma-separated list in settings if needed
             allow_credentials=True,
             allow_methods=["GET", "POST", "PUT", "DELETE"],
             allow_headers=["Authorization", "Content-Type"],
@@ -78,11 +76,11 @@ def create_app() -> FastAPI:
     app.add_exception_handler(RequestValidationError, custom_validation_exception_handler)
     app.add_exception_handler(FastAPIRequestValidationError, custom_validation_exception_handler)
 
-    # Routers
+    # Routers (add API versioning prefix)
     app.include_router(user_router, prefix="/user", tags=["User"])
     app.include_router(auth_router, prefix="/user/auth", tags=["Auth"])
 
-    # Startup/Shutdown events
+    # Startup/Shutdown events (to be refactored to lifespan in next step)
     @app.on_event("startup")
     async def startup_event():
         try:

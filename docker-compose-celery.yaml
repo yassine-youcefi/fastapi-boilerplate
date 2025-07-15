@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+  redis:
+    image: redis:7
+    container_name: fastapi-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - fastapi_network
+
   celery-worker:
     build:
       context: .
@@ -12,6 +21,8 @@ services:
       - .:/code
     networks:
       - fastapi_network
+    depends_on:
+      - redis
     healthcheck:
       disable: true
 
@@ -25,6 +36,8 @@ services:
       - .:/code
     networks:
       - fastapi_network
+    depends_on:
+      - redis
     healthcheck:
       disable: true
 

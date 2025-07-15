@@ -5,12 +5,14 @@ from fastapi import FastAPI
 from fastapi.exception_handlers import RequestValidationError
 from fastapi.exceptions import RequestValidationError as FastAPIRequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.auth.routes.auth_routers import auth_router
 from app.config.config import settings
 from app.dependencies import get_redis_cache
 from app.exceptions import custom_http_exception_handler, custom_validation_exception_handler
 from app.integrations.celery_app import create_celery_app
+from app.integrations.database import engine
 from app.user.routes.user_routers import user_router
 
 # =========================
@@ -104,6 +106,7 @@ celery = create_celery_app()
 @app.get("/health", include_in_schema=False)
 async def health_check():
     redis_status = "unknown"
+    db_status = "unknown"
     try:
         redis_cache = await get_redis_cache()
         if await redis_cache.ping():
@@ -112,4 +115,10 @@ async def health_check():
             redis_status = "unreachable"
     except Exception as e:
         redis_status = f"error: {str(e)}"
-    return {"status": "ok", "redis": redis_status}
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+            db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    return {"status": "ok", "redis": redis_status, "database": db_status}
